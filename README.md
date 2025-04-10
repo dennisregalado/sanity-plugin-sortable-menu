@@ -1,11 +1,11 @@
-# sanity-plugin-sortable-tree
+# sanity-plugin-sortable-menu
 
 > This is a **Sanity Studio v3** plugin.
 
 ## Installation
 
 ```sh
-npm install sanity-plugin-sortable-tree
+npm install sanity-plugin-sortable-menu
 ```
 
 ## Usage
@@ -14,11 +14,11 @@ Add it as a plugin in `sanity.config.ts` (or .js):
 
 ```ts
 import {defineConfig} from 'sanity'
-import {myPlugin} from 'sanity-plugin-sortable-tree'
+import {sortableMenu} from 'sanity-plugin-sortable-menu'
 
 export default defineConfig({
   //...
-  plugins: [myPlugin({})],
+  plugins: [sortableMenu()],
 })
 ```
 
