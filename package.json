@@ -1,0 +1,83 @@
+{
+  "name": "sanity-plugin-sortable-tree",
+  "version": "1.0.0",
+  "description": "tbd",
+  "keywords": [
+    "sanity",
+    "sanity-plugin"
+  ],
+  "homepage": "https://github.com/dennisregalado/sanity-plugin-sortable-tree#readme",
+  "bugs": {
+    "url": "https://github.com/dennisregalado/sanity-plugin-sortable-tree/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/dennisregalado/sanity-plugin-sortable-tree.git"
+  },
+  "license": "MIT",
+  "author": "Dennis Regalado <35279373+dennisregalado@users.noreply.github.com>",
+  "sideEffects": false,
+  "type": "commonjs",
+  "sanityPlugin": {
+    "verifyPackage": {
+      "tsc": false
+    }
+  },
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "sanity.json",
+    "src",
+    "v2-incompatible.js"
+  ],
+  "scripts": {
+    "build": "plugin-kit verify-package --silent && pkg-utils build --strict --check --clean",
+    "format": "prettier --write --cache --ignore-unknown .",
+    "link-watch": "plugin-kit link-watch",
+    "lint": "eslint .",
+    "prepublishOnly": "npm run build",
+    "watch": "pkg-utils watch --strict"
+  },
+  "dependencies": {
+    "@dnd-kit/helpers": "^0.0.10",
+    "@dnd-kit/react": "^0.0.10",
+    "@sanity/incompatible-plugin": "^1.0.5",
+    "@sanity/ui": "^2.15.13"
+  },
+  "devDependencies": {
+    "@sanity/pkg-utils": "^7.2.2",
+    "@sanity/plugin-kit": "^4.0.19",
+    "@types/react": "^19.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@typescript-eslint/parser": "^8.29.1",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-config-sanity": "^7.1.4",
+    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.5.3",
+    "prettier-plugin-packagejson": "^2.5.10",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "sanity": "^3.83.0",
+    "styled-components": "^6.1.17",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "react": "^18",
+    "sanity": "^3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
