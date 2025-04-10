@@ -1,7 +1,8 @@
 import {definePlugin} from 'sanity'
-import { menuType, menuItemType } from './schema'
+import { menu } from './schema/menu'
+import { menuItem } from './schema/menuItem'
 
-interface MyPluginConfig {
+interface PluginConfig {
   /* nothing here yet */
 }
 
@@ -18,13 +19,13 @@ interface MyPluginConfig {
  * })
  * ```
  */
-export const sortableMenu = definePlugin<MyPluginConfig | void>((config = {}) => {
+export const sortableMenu = definePlugin<PluginConfig | void>((config = {}) => {
   // eslint-disable-next-line no-console
   console.log('hello from sanity-plugin-sortable-tree')
   return {
     name: 'sanity-plugin-sortable-menu',
     schema: {
-      types: [menuType, menuItemType],
+      types: [menu, menuItem],
     },
   }
 })

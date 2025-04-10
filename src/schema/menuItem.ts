@@ -1,42 +1,6 @@
-import { type ArrayDefinition, defineArrayMember, defineField, defineType } from 'sanity'
+import { defineArrayMember, defineField, defineType } from "sanity";
 
-/**
- * @public
- */
-const schemaName = 'menu' as const
-
-/**
- * @public
- */
-export interface PtStringDefinition
-    extends Omit<ArrayDefinition, 'type' | 'of' | 'options' | 'decorators'> {
-    type: typeof schemaName
-    options?: {
-        sortable?: boolean
-    }
-}
-
-declare module '@sanity/types' {
-    // makes type: 'ptString' narrow correctly when using defineType/defineField/defineArrayMember
-    export interface IntrinsicDefinitions {
-        ptString: PtStringDefinition
-    }
-}
-
-/**
- * @public
- */
-export const menuType = defineType({
-    type: 'array',
-    name: schemaName,
-    //   components: { input: InputComponent as any },
-    of: [
-        defineArrayMember({ type: 'menuItem' })
-    ],
-})
-
-
-export const menuItemType = defineType({
+export const menuItem = defineType({
     name: 'menuItem',
     title: 'Menu Item',
     type: 'object',

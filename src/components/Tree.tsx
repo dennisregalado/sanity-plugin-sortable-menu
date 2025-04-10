@@ -2,17 +2,17 @@ import { useRef, useState } from 'react';
 import { DragDropProvider, DragOverlay } from '@dnd-kit/react';
 import { isKeyboardEvent } from '@dnd-kit/dom/utilities';
 import { move } from '@dnd-kit/helpers';
-import { FlattenedItem, type Item } from './types.js';
+import { FlattenedItem, type Item } from '../types.js';
 import {
     flattenTree,
     buildTree,
     getProjection,
     getDragDepth,
-} from './utils.js';
+} from '../utils.js';
 import { TreeItem } from './TreeItem.js';
 import { TreeItemOverlay } from './TreeItemOverlay';
 import { Grid, Card } from '@sanity/ui';
-import { NewTreeItem } from './NewTreeItem';
+import { NewTreeItem } from './NewTreeItem.jsx';
 import { randomKey } from '@sanity/util/content';
 
 interface Props {
@@ -51,6 +51,7 @@ export function Tree({ items, options: defaultOptions = {}, onChange }: Props) {
         parentId: string | null,
         depth: number
     }) => {
+        
         const newItem: FlattenedItem = {
             _key: randomKey(12),
             _type: 'menuItem',
@@ -234,7 +235,7 @@ export function Tree({ items, options: defaultOptions = {}, onChange }: Props) {
                                     }}
                                 />
                                 {hasAddButton && (
-                                    <div style={{ marginLeft: (item.depth) * indentation, marginTop: 2 }}>
+                                    <div key={item.id + 'add-button'} style={{ marginLeft: (item.depth) * indentation, marginTop: 2 }}>
                                         <NewTreeItem
                                             text={parent!.label ? `Add menu item to ${parent!.label}` : 'Add menu item'}
                                             addItem={() => handleAddItem({ parentId: parent!.id, depth: item.depth })}

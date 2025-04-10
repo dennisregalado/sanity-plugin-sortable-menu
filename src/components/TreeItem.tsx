@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/react/sortable';
 import { CheckmarkIcon, ChevronDownIcon, ChevronRightIcon, DragHandleIcon, EditIcon, EllipsisVerticalIcon, TrashIcon } from '@sanity/icons';
 import { Autocomplete, Avatar, Box, Button, Card, Flex, Grid, MenuButton, Text, TextInput } from '@sanity/ui';
-import { FlattenedItem } from './types';
+import { FlattenedItem } from '../types';
 import { useState } from 'react';
 import { ContextMenu } from './ContextMenu';
 

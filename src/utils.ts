@@ -1,6 +1,6 @@
 import {UniqueIdentifier} from '@dnd-kit/abstract';
 
-import type {Item, FlattenedItem} from './types.ts';
+import type {Item, FlattenedItem} from './types.js';
 
 export function flattenTree(
   items: Item[],
@@ -17,19 +17,9 @@ export function flattenTree(
 }
 
 export function buildTree(flattenedItems: FlattenedItem[]): Item[] {
-  const root: Item = {
-    _key: 'root',
-    _type: 'menuItem',
-    id: 'root',
-    label: '',
-    url: '',
-    children: []
-  };
+  const root: Item = {id: 'root', children: []};
   const nodes: Record<string, Item> = {[root.id]: root};
-  const items = flattenedItems.map((item) => ({
-    ...item,
-    children: []
-  }));
+  const items = flattenedItems.map((item) => ({...item, children: []}));
 
   for (const item of items) {
     const {id, children} = item;
@@ -38,14 +28,7 @@ export function buildTree(flattenedItems: FlattenedItem[]): Item[] {
 
     if (!parent) continue;
 
-    nodes[id] = {
-      _key: item._key,
-      _type: item._type,
-      id,
-      label: item.label,
-      url: item.url,
-      children
-    };
+    nodes[id] = {id, children};
     parent.children.push(item);
   }
 
