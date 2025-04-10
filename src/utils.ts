@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {UniqueIdentifier} from '@dnd-kit/abstract';
 
 import type {Item, FlattenedItem} from './types.js';

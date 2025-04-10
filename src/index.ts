@@ -1,4 +1,4 @@
-import {definePlugin} from 'sanity'
+import { definePlugin } from 'sanity'
 import { menu } from './schema/menu'
 import { menuItem } from './schema/menuItem'
 

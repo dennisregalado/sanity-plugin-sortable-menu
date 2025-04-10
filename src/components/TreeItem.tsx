@@ -21,7 +21,7 @@ const config = {
   },
 } as const;
 
-export function TreeItem({ depth, id, index, parentId, onRemove, label = '', url = '', children }: Props) {
+export function TreeItem({ depth, id, index, parentId, onRemove, label = '', url = '', children = [] }: Props) {
 
   const [collapsed, setCollapsed] = useState(false);
 

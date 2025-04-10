@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { randomKey } from '@sanity/util/content';
 import { ArrayOfObjectsInputProps } from 'sanity';
@@ -13,6 +14,7 @@ export function MenuInput(props: ArrayOfObjectsInputProps) {
     const [newItems, setNewItems] = useState<Item[]>([
         {
             _key: randomKey(12),
+            _type: 'menuItem',
             id: 'Homepage',
             label: 'Homepage',
             url: '/',

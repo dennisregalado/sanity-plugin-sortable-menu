@@ -1,18 +1,18 @@
 {
-  "name": "sanity-plugin-sortable-tree",
+  "name": "sanity-plugin-sortable-menu",
   "version": "1.0.0",
   "description": "tbd",
   "keywords": [
     "sanity",
     "sanity-plugin"
   ],
-  "homepage": "https://github.com/dennisregalado/sanity-plugin-sortable-tree#readme",
+  "homepage": "https://github.com/dennisregalado/sanity-plugin-sortable-menu#readme",
   "bugs": {
-    "url": "https://github.com/dennisregalado/sanity-plugin-sortable-tree/issues"
+    "url": "https://github.com/dennisregalado/sanity-plugin-sortable-menu/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/dennisregalado/sanity-plugin-sortable-tree.git"
+    "url": "git+ssh://git@github.com/dennisregalado/sanity-plugin-sortable-menu.git"
   },
   "license": "MIT",
   "author": "Dennis Regalado <35279373+dennisregalado@users.noreply.github.com>",
