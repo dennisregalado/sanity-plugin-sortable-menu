@@ -1,13 +1,10 @@
-import { defineArrayMember, defineType, ArrayOptions } from "sanity";
+import { defineArrayMember, defineType } from "sanity";
 import { MenuInput } from "../input";
 
 export const menu = defineType({
     name: 'menu',
     type: 'array',
-    options: {
-        depth: 2,
-    },
-    components: { input: MenuInput as any },
+    components: { input: MenuInput },
     of: [
         defineArrayMember({ type: 'menuItem' })
     ],

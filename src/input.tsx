@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { randomKey } from '@sanity/util/content';
 import { ArrayOfObjectsInputProps } from 'sanity';
 import { set } from 'sanity';
-import { Tree as DefaultTree } from './components/Tree';
+import { Tree } from './components/Tree';
 import { Item } from './types';
 
 export function MenuInput(props: ArrayOfObjectsInputProps) {
     const { onChange, schemaType } = props;
 
-    const maxDepth = schemaType?.options?.maxDepth || 2;
+    const maxDepth = typeof schemaType?.options?.depth === 'number' ? schemaType?.options?.depth : 5;
 
     const [newItems, setNewItems] = useState<Item[]>([
         {
@@ -99,5 +99,5 @@ export function MenuInput(props: ArrayOfObjectsInputProps) {
         onChange(set(items));
     }
 
-    return <DefaultTree items={newItems} onChange={handleChange} />
+    return <Tree maxDepth={maxDepth} items={newItems} onChange={handleChange} />
 }

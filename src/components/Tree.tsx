@@ -17,16 +17,12 @@ import { randomKey } from '@sanity/util/content';
 
 interface Props {
     items: Item[];
-    options?: {
-        indentation?: number;
-        maxDepth?: number;
-    };
+    indentation?: number;
+    maxDepth?: number;
     onChange(items: Item[]): void;
 }
 
-export function Tree({ items, options: defaultOptions = {}, onChange }: Props) {
-
-    const { indentation = 50, maxDepth = 2 } = defaultOptions;
+export function Tree({ items, indentation = 50, maxDepth = 5, onChange }: Props) {
 
     const [flattenedItems, setFlattenedItems] = useState<FlattenedItem[]>(() =>
         flattenTree(items)
@@ -51,7 +47,7 @@ export function Tree({ items, options: defaultOptions = {}, onChange }: Props) {
         parentId: string | null,
         depth: number
     }) => {
-        
+
         const newItem: FlattenedItem = {
             _key: randomKey(12),
             _type: 'menuItem',
@@ -105,12 +101,11 @@ export function Tree({ items, options: defaultOptions = {}, onChange }: Props) {
                         const dragDepth = getDragDepth(offsetLeft, indentation);
                         const projectedDepth = initialDepth.current + dragDepth;
 
-                        if (maxDepth) {
-                            // Prevent dragging items beyond the maximum allowed depth
-                            // If the projected depth would exceed maxDepth, return the current state unchanged
-                            if (projectedDepth > maxDepth) {
-                                return flattenedItems;
-                            }
+
+                        // Prevent dragging items beyond the maximum allowed depth
+                        // If the projected depth would exceed maxDepth, return the current state unchanged
+                        if (projectedDepth > maxDepth) {
+                            return flattenedItems;
                         }
 
                         const { depth, parentId } = getProjection(
@@ -150,7 +145,7 @@ export function Tree({ items, options: defaultOptions = {}, onChange }: Props) {
 
                             // Prevent keyboard navigation beyond maxDepth
                             // If the keyboard navigation would take the item beyond maxDepth, cancel the operation
-                            if (maxDepth && keyboardDepth > maxDepth) {
+                            if (keyboardDepth > maxDepth) {
                                 return;
                             }
                         }
@@ -162,12 +157,11 @@ export function Tree({ items, options: defaultOptions = {}, onChange }: Props) {
                     const projectedDepth =
                         keyboardDepth ?? initialDepth.current + dragDepth;
 
-                    if (maxDepth) {
-                        // Prevent dragging beyond maxDepth
-                        // If the projected depth would exceed maxDepth, cancel the drag operation
-                        if (projectedDepth > maxDepth) {
-                            return;
-                        }
+
+                    // Prevent dragging beyond maxDepth
+                    // If the projected depth would exceed maxDepth, cancel the drag operation
+                    if (projectedDepth > maxDepth) {
+                        return;
                     }
 
                     const { depth, parentId } = getProjection(
