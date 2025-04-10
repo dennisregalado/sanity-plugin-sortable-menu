@@ -119,12 +119,6 @@ function LabelInput(props: { value: string, onChange: (value: string) => void })
           value={props.value}
         />
       </Grid>
-      <MenuButton
-        id="label-input-menu"
-        button={<Button paddingX={2} mode="bleed" icon={EllipsisVerticalIcon} />}
-        menu={<ContextMenu />}
-        popover={{ portal: true, placement: 'top' }}
-      />
     </Card>
   )
 }

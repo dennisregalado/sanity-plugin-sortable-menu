@@ -6,7 +6,9 @@ import { Tree as DefaultTree } from './components/Tree';
 import { Item } from './types';
 
 export function MenuInput(props: ArrayOfObjectsInputProps) {
-    const { onChange } = props;
+    const { onChange, schemaType } = props;
+
+    const maxDepth = schemaType?.options?.maxDepth || 2;
 
     const [newItems, setNewItems] = useState<Item[]>([
         {
