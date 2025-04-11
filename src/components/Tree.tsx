@@ -14,6 +14,7 @@ import { TreeItemOverlay } from './TreeItemOverlay';
 import { Grid, Card } from '@sanity/ui';
 import { NewTreeItem } from './NewTreeItem.jsx';
 import { randomKey } from '@sanity/util/content';
+import { ArrayOfObjectsItem } from 'sanity';
 
 interface Props {
     items: Item[];
@@ -22,7 +23,7 @@ interface Props {
     onChange(items: Item[]): void;
 }
 
-export function Tree({ items, indentation = 50, maxDepth = 5, onChange }: Props) {
+export function Tree({ items, context, indentation = 50, maxDepth = 5, onChange }: Props) {
 
     const [flattenedItems, setFlattenedItems] = useState<FlattenedItem[]>(() =>
         flattenTree(items)
@@ -215,9 +216,23 @@ export function Tree({ items, indentation = 50, maxDepth = 5, onChange }: Props)
                         const parent = getParentItem(item.parentId);
                         const hasAddButton = parent && isLastChild(item) && item.depth <= maxDepth;
 
+                        const matchMember = context.members.find((member) => member.key === parent?._key || member.key === item._key);
+
                         return (
                             <>
+
+
                                 <TreeItem
+                                    editing={matchMember && (
+                                        <ArrayOfObjectsItem
+                                            {...context}
+                                            key={matchMember.key}
+                                            member={{
+                                                ...matchMember,
+                                                data: item,
+                                            }}
+                                        />
+                                    )}
                                     key={item.id}
                                     {...item}
                                     index={index}
@@ -227,7 +242,8 @@ export function Tree({ items, indentation = 50, maxDepth = 5, onChange }: Props)
                                         setFlattenedItems(flattenTree(tree));
                                         onChange(tree);
                                     }}
-                                />
+                                >
+                                </TreeItem>
                                 {hasAddButton && (
                                     <div key={item.id + 'add-button'} style={{ marginLeft: (item.depth) * indentation, marginTop: 2 }}>
                                         <NewTreeItem

@@ -1,8 +1,18 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 
+import { ItemInput } from "../itemInput";
+import { Item } from "../item";
+import { EllipsisVerticalIcon, } from '@sanity/icons';
+import { ItemPreview } from "../itemPreview";
+
 export const menuItem = defineType({
     name: 'menuItem',
     title: 'Menu Item',
+    components: {
+        input: ItemInput,
+        item: Item,
+        preview: ItemPreview,
+    },
     type: 'object',
     fieldsets: [{ name: 'advanced', title: 'Advanced' }],
     fields: [
@@ -16,22 +26,24 @@ export const menuItem = defineType({
             name: 'reference',
             title: 'Reference',
             type: 'reference',
+            hidden: true,
             weak: true,
             to: [{ type: 'shopAll' }, { type: 'product' }, { type: 'collection' }, { type: 'page' }, { type: 'bundles' }],
         }),
         defineField({
             name: 'url',
-            title: 'URL',
+            title: 'Link',
             type: 'url',
             validation: (Rule) => Rule.uri({
                 allowRelative: true,
                 scheme: ['https', 'http', 'mailto', 'tel'],
-            }),
+            }).error('Enter a valid URL or choose a page'),
         }),
         defineField({
             title: 'Parameters',
             name: 'parameters',
             type: 'string',
+            hidden: true,
             description: 'Add custom parameters to the URL, such as UTM tags',
             validation: (rule) =>
                 rule.custom((value) => {
@@ -57,17 +69,53 @@ export const menuItem = defineType({
             title: 'Menu items',
             type: 'array',
             of: [defineArrayMember({ type: 'menuItem' })]
+        }),
+        defineField({
+            name: 'isEditing',
+            title: 'Is Editing',
+            type: 'boolean',
+            hidden: true,
+            description: 'Whether the menu item is being edited',
+        }),
+        defineField({
+            name: 'parentId',
+            title: 'Parent ID',
+            type: 'string',
+            hidden: true,
+            description: 'The parent ID of the menu item',
+        }),
+        defineField({
+            name: 'index',
+            title: 'Index',
+            type: 'number',
+            hidden: true,
+            description: 'The index of the menu item',
+        }),
+        defineField({
+            name: 'id',
+            title: 'ID',
+            type: 'string',
+            hidden: true,
+            description: 'The ID of the menu item',
+        }),
+        defineField({
+            name: 'depth',
+            title: 'Depth',
+            type: 'number',
+            hidden: true,
+            description: 'The depth of the menu item',
         })
     ],
     preview: {
         select: {
-            label: 'label',
-            link: 'link',
+            title: 'label',
+            url: 'url',
+            media: 'reference.image',
         },
-        prepare({ label, link }) {
+        prepare({ title, url, media }) {
             return {
-                title: label,
-                subtitle: link,
+                title,
+                media: media || EllipsisVerticalIcon
             };
         },
     },

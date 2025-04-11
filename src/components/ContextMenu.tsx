@@ -1,10 +1,11 @@
 import { CogIcon, CopyIcon, UserIcon } from "@sanity/icons";
-import { BasketIcon, SearchIcon } from "@sanity/icons";
+import { BasketIcon, SearchIcon, EarthGlobeIcon } from "@sanity/icons";
 import { HomeIcon } from "@sanity/icons";
 import { Box, Menu, MenuDivider, MenuItem, Text } from "@sanity/ui";
 
 export function ContextMenu({
-    items = []
+    items = [],
+    onClick
 }) {
 
     const defaultItems = [
@@ -12,16 +13,24 @@ export function ContextMenu({
             text: "Online Store",
             children: [
                 {
+                    value: '/',
                     icon: HomeIcon,
                     text: "Homepage",
                 },
                 {
+                    value: '/search',
                     icon: SearchIcon,
                     text: "Search",
                 },
                 {
+                    value: '/cart',
                     icon: BasketIcon,
                     text: "Cart",
+                },
+                {
+                    value: '?selectedCurrency=USD',
+                    icon: EarthGlobeIcon,
+                    text: "Currency",
                 }
             ]
         },
@@ -31,14 +40,17 @@ export function ContextMenu({
                 {
                     icon: CopyIcon,
                     text: "Orders",
+                    value: '/accounts/orders',
                 },
                 {
                     icon: UserIcon,
                     text: "Profile",
+                    value: '/accounts/profile',
                 },
                 {
                     icon: CogIcon,
                     text: "Settings",
+                    value: '/accounts',
                 }
             ]
         }
@@ -51,7 +63,7 @@ export function ContextMenu({
                     <Text size={1} weight='medium'>{item.text}</Text>
                 </Box>
                 {item.children ? item.children.map((child) => (
-                    <MenuItem key={child.text} icon={child.icon} text={child.text} fontSize={1} />
+                    <MenuItem onClick={() => onClick(child.value)} key={child.text} icon={child.icon} text={child.text} fontSize={1} />
                 )) : null}
                 {index !== defaultItems.length - 1 && <MenuDivider />}
             </>
