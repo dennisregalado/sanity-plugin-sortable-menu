@@ -101,7 +101,5 @@ export function MenuInput(props: ArrayOfObjectsInputProps) {
         onChange(set(items));
     }
 
-    return <>
-        <Tree context={props} members={props.members} maxDepth={maxDepth} items={newItems} onChange={handleChange} />
-    </>
+    return <Tree context={props} members={props.members} maxDepth={maxDepth} items={newItems} onChange={handleChange} />
 }

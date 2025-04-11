@@ -3,7 +3,7 @@ import { CheckmarkIcon, ChevronDownIcon, ChevronRightIcon, DragHandleIcon, EditI
 import { Box, Button, Card, Flex, Text, Tooltip } from '@sanity/ui';
 import { FlattenedItem } from '../types';
 import { useState } from 'react';
-import { TreeItemProvider, useTreeItem } from '../context/TreeItemContext';
+import { TreeItemProvider, useTreeItem } from '../hooks/useTreeItem';
 
 export interface Props extends FlattenedItem {
   onRemove?(): void;
@@ -66,14 +66,13 @@ export function TreeItem({ depth, id, index, parentId, onRemove, label = '', url
 }
 
 export function MenuItem({ removeButton, dragButton, isDragging, children, hasChildren, collapsed, toggleCollapse }: { removeButton?: React.ReactNode, dragButton?: React.ReactNode, isDragging: boolean, label: string, children: React.ReactNode, hasChildren: boolean, url: string, collapsed: boolean, toggleCollapse: () => void }) {
-  const { isEditing, setIsEditing, isHovering, setIsHovering } = useTreeItem();
-  const hasError = false;
+  const { isEditing, setIsEditing, isHovering, setIsHovering, validation } = useTreeItem();
 
   return <Card
     padding={1}
     radius={2}
     shadow={(!isHovering && isDragging) ? 5 : 0}
-    tone={hasError && !isEditing ? 'critical' : isHovering && !isDragging && !isEditing ? 'transparent' : 'inherit'}
+    tone={validation && !isEditing ? validation : isHovering && !isDragging && !isEditing ? 'transparent' : 'inherit'}
     onMouseEnter={() => setIsHovering(true)}
     onMouseLeave={() => setIsHovering(false)}
   >
@@ -93,7 +92,7 @@ export function MenuItem({ removeButton, dragButton, isDragging, children, hasCh
       <Flex width="fill" className='w-full' style={{ width: '100%' }} id='menu-item'>
         {children}
       </Flex>
-      {hasError && !isHovering && !isEditing ? (
+      {validation && !isHovering && !isEditing ? (
         <Box paddingX={2}>
           <Text size={1} weight='medium'>
             <ErrorOutlineIcon />
