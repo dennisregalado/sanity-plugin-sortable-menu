@@ -2,7 +2,7 @@ import { defineArrayMember, defineField, defineType } from "sanity";
 
 import { ItemInput } from "../itemInput";
 import { Item } from "../item";
-import { EllipsisVerticalIcon, } from '@sanity/icons';
+import { BlockElementIcon, } from '@sanity/icons';
 import { ItemPreview } from "../itemPreview";
 
 export const menuItem = defineType({
@@ -112,10 +112,10 @@ export const menuItem = defineType({
             url: 'url',
             media: 'reference.image',
         },
-        prepare({ title, url, media }) {
+        prepare({ title, media }) {
             return {
                 title,
-                media: media || EllipsisVerticalIcon
+                media: media || BlockElementIcon
             };
         },
     },

@@ -24,7 +24,7 @@ export function ItemPreview(props: ItemPreviewProps) {
             style={{ width: '100%', height: '33px' }}
         >
             <Flex gap={3} align="center" style={{ width: '100%' }}>
-                {Media && title && <Media dimensions={{ width: 20, height: 20 }} layout="default" />}
+                {Media && <Media dimensions={{ width: 32, height: 32 }} layout='default' />}
                 <Text size={1} weight="medium" style={{ color: title ? undefined : 'var(--card-muted-fg-color)' }}>
                     {title || 'Untitled'}
                 </Text>
