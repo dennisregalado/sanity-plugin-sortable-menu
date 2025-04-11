@@ -1,15 +1,14 @@
 import React from 'react';
 
-import { Button, Flex, Grid, MenuButton } from '@sanity/ui';
+import { Flex, Grid } from '@sanity/ui';
 import { ObjectInputProps, set } from 'sanity';
 import { ContextMenu } from './components/ContextMenu';
-import { EllipsisVerticalIcon } from '@sanity/icons';
 
 export function ItemInput(props: ObjectInputProps) {
     const { members, onChange, path, value } = props;
 
     const handleLinkChange = (linkValue: string) => {
-        onChange(set(value ? { ...value, url: linkValue } : { 
+        onChange(set(value ? { ...value, url: linkValue } : {
             _type: 'menuItem',
             url: linkValue
         }));
@@ -30,13 +29,7 @@ export function ItemInput(props: ObjectInputProps) {
                     members: [member]
                 }))}
             </Grid>
-            <MenuButton
-                id="link-input-menu"
-                button={<Button style={{ height: '33px' }} paddingX={2} mode="bleed" icon={EllipsisVerticalIcon} />}
-                menu={<ContextMenu onClick={handleLinkChange} />}
-                popover={{ portal: true, placement: 'top' }}
-            />
+            <ContextMenu onClick={handleLinkChange} />
         </Flex>
-
     </>
 }

@@ -83,7 +83,14 @@ export function MenuItem({ removeButton, dragButton, isDragging, children, hasCh
       {hasChildren && (
         <Button mode="bleed" paddingX={2} icon={collapsed ? ChevronRightIcon : ChevronDownIcon} onClick={toggleCollapse} />
       )}
-      <Flex width="fill" className='w-full' style={{ width: '100%' }}>
+      <style>
+        {`
+          #menu-item > div {
+            width: 100%;
+          }
+        `}
+      </style>
+      <Flex width="fill" className='w-full' style={{ width: '100%' }} id='menu-item'>
         {children}
       </Flex>
       {hasError && !isHovering && !isEditing ? (
