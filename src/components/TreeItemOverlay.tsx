@@ -1,4 +1,3 @@
-import type { UniqueIdentifier } from '@dnd-kit/abstract';
 import { AddIcon } from '@sanity/icons';
 import { Button } from '@sanity/ui';
 import { useMemo } from 'react';

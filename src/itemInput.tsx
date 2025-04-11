@@ -5,7 +5,7 @@ import { ObjectInputProps, set } from 'sanity';
 import { ContextMenu } from './components/ContextMenu';
 
 export function ItemInput(props: ObjectInputProps) {
-    const { members, onChange, path, value } = props;
+    const { members, onChange, value } = props;
 
     const handleLinkChange = (linkValue: string) => {
         onChange(set(value ? { ...value, url: linkValue } : {
@@ -13,7 +13,7 @@ export function ItemInput(props: ObjectInputProps) {
             url: linkValue
         }));
     };
-    
+
     return <>
         <style>
             {`

@@ -28,7 +28,7 @@ export function ContextMenu({
                     text: "Cart",
                 },
                 {
-                    value: '?selectedCurrency=USD',
+                    value: '?currency=true',
                     icon: EarthGlobeIcon,
                     text: "Currency",
                 }
