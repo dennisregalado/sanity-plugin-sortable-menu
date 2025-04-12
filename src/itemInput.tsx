@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Flex, Grid } from '@sanity/ui';
+import { Flex, Grid, Tooltip, Text } from '@sanity/ui';
 import { ObjectInputProps, set } from 'sanity';
 import { ContextMenu } from './components/ContextMenu';
 
@@ -24,7 +24,7 @@ export function ItemInput(props: ObjectInputProps) {
         </style>
         <Flex gap={1} className='w-full' align="flex-end">
             <Grid id='item-input' columns={2} gap={1} className='w-full'>
-                {members.filter((member) => member.kind === 'field').map((member) => props.renderDefault({
+                {members.filter((member) => member.kind === 'field' && member.name !== 'children').map((member) => props.renderDefault({
                     ...props,
                     members: [member]
                 }))}

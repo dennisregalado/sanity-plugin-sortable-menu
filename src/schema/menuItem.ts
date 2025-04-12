@@ -1,10 +1,8 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
-
+import { BlockElementIcon, } from '@sanity/icons';
 import { ItemInput } from "../itemInput";
 import { Item } from "../item";
-import { BlockElementIcon, } from '@sanity/icons';
 import { ItemPreview } from "../itemPreview";
-
 export const menuItem = defineType({
     name: 'menuItem',
     title: 'Menu Item',
@@ -64,10 +62,10 @@ export const menuItem = defineType({
             fieldset: 'advanced',
         }),
         defineField({
-            hidden: true,
+            //    hidden: true,
+            type: 'array',
             name: 'children',
             title: 'Menu items',
-            type: 'array',
             of: [defineArrayMember({ type: 'menuItem' })]
         }),
         defineField({

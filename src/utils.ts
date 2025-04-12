@@ -8,7 +8,8 @@ export function flattenTree(
   parentId: string | null = null,
   depth = 0
 ): FlattenedItem[] {
-  return items.reduce<FlattenedItem[]>((acc, item, index) => {
+  if (!items) return [];
+  return items?.reduce<FlattenedItem[]>((acc, item, index) => {
     return [
       ...acc,
       {...item, parentId, depth, index},

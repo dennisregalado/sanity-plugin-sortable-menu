@@ -78,9 +78,34 @@ export function MenuItem({ removeButton, dragButton, isDragging, children, hasCh
   >
     <Flex gap={1} width="fill" align={isEditing ? 'flex-end' : 'center'} paddingBottom={isEditing ? 3 : 0}>
 
-      {dragButton}
+      <Tooltip
+        content={
+          <Text muted size={1}>
+            Drag to reorder
+          </Text>
+        }
+        animate
+        fallbackPlacements={['right', 'left']}
+        placement="top"
+        portal
+      >
+        {dragButton}
+      </Tooltip>
+
       {hasChildren && (
-        <Button mode="bleed" paddingX={2} icon={collapsed ? ChevronRightIcon : ChevronDownIcon} onClick={toggleCollapse} />
+        <Tooltip
+          content={
+            <Text muted size={1}>
+              {collapsed ? 'Expand' : 'Collapse'}
+            </Text>
+          }
+          animate
+          fallbackPlacements={['right', 'left']}
+          placement="top"
+          portal
+        >
+          <Button mode="bleed" paddingX={2} icon={collapsed ? ChevronRightIcon : ChevronDownIcon} onClick={toggleCollapse} />
+        </Tooltip>
       )}
       <style>
         {`
@@ -101,9 +126,46 @@ export function MenuItem({ removeButton, dragButton, isDragging, children, hasCh
       ) : (isHovering || isEditing) && (
         <Flex gap={1} className='shrink-0'>
           {isEditing ?
-            <Button paddingX={2} mode="bleed" icon={CheckmarkIcon} onClick={() => setIsEditing(false)} /> :
-            <Button paddingX={2} mode="bleed" icon={EditIcon} onClick={() => setIsEditing(true)} />}
-          {removeButton}
+            <Tooltip
+              content={
+                <Text muted size={1}>
+                  Close
+                </Text>
+              }
+              animate
+              fallbackPlacements={['right', 'left']}
+              placement="top"
+              portal
+            >
+              <Button paddingX={2} mode="bleed" icon={CheckmarkIcon} onClick={() => setIsEditing(false)} />
+            </Tooltip> :
+            <Tooltip
+              content={
+                <Text muted size={1}>
+                  Edit
+                </Text>
+              }
+              animate
+              fallbackPlacements={['right', 'left']}
+              placement="top"
+              portal
+            >
+              <Button paddingX={2} mode="bleed" icon={EditIcon} onClick={() => setIsEditing(true)} />
+            </Tooltip>
+          }
+          <Tooltip
+            content={
+              <Text muted size={1}>
+                Remove
+              </Text>
+            }
+            animate
+            fallbackPlacements={['right', 'left']}
+            placement="top"
+            portal
+          >
+            {removeButton}
+          </Tooltip>
         </Flex>
       )}
     </Flex>
