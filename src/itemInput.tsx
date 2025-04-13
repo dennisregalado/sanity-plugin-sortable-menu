@@ -1,18 +1,79 @@
-import React from 'react';
-
-import { Flex, Grid, Tooltip, Text } from '@sanity/ui';
+import React, { useCallback } from 'react';
+import { Flex, Grid, Text } from '@sanity/ui';
+import { CogIcon, CopyIcon, UserIcon, BasketIcon, SearchIcon, EarthGlobeIcon, HomeIcon } from "@sanity/icons";
 import { ObjectInputProps, set } from 'sanity';
 import { ContextMenu } from './components/ContextMenu';
 
+export const defaultMenu = [
+    {
+        label: "Online Store",
+        children: [
+            {
+                value: '/',
+                icon: () => <Text>🏡</Text>,
+                label: "Homepage",
+            },
+            {
+                value: '/search',
+                icon: () => <Text>🔍</Text>,
+                label: "Search",
+            },
+            {
+                value: '/collections/all',
+                icon: () => <Text>🛍️</Text>,
+                label: "Shop All",
+            },
+            {
+                value: '/cart',
+                icon: () => <Text>🛒</Text>,
+                label: "Cart",
+            },
+            {
+                value: '?currency=true',
+                icon: () => <Text>💱</Text>,
+                label: "Currency",
+            }
+        ]
+    },
+    {
+        label: "Customer accounts",
+        children: [
+            {
+                icon: () => <Text>📦</Text>,
+                label: "Orders",
+                value: '/accounts/orders',
+            },
+            {
+                icon: () => <Text>👤</Text>,
+                label: "Profile",
+                value: '/accounts/profile',
+            },
+            {
+                icon: () => <Text>⚙️</Text>,
+                label: "Settings",
+                value: '/accounts',
+            }
+        ]
+    }
+]
 export function ItemInput(props: ObjectInputProps) {
-    const { members, onChange, value } = props;
+    const { members, onChange, value, path } = props;
 
-    const handleLinkChange = (linkValue: string) => {
-        onChange(set(value ? { ...value, url: linkValue } : {
+    const handleLinkChange = useCallback((item: { label: string, value: string }) => {
+
+        let label = value?.label || item?.label;
+
+        onChange(set(value ? {
+            ...value,
             _type: 'menuItem',
-            url: linkValue
+            url: item.value,
+            label,
+        } : {
+            label,
+            _type: 'menuItem',
+            url: item.value,
         }));
-    };
+    }, [onChange, value, path]);
 
     return <>
         <style>
@@ -20,16 +81,23 @@ export function ItemInput(props: ObjectInputProps) {
                 #item-input [data-ui="fieldHeaderContentBox"] {
                    padding-bottom: 0 !important;
                 }
+
+                #item-input > div {
+                   width: 100%;
+                }
             `}
         </style>
-        <Flex gap={1} className='w-full' align="flex-end">
-            <Grid id='item-input' columns={2} gap={1} className='w-full'>
+        <Flex gap={1} align="flex-end" id='item-input'>
+            <Grid columns={2} gap={1}>
                 {members.filter((member) => member.kind === 'field' && member.name !== 'children').map((member) => props.renderDefault({
                     ...props,
                     members: [member]
                 }))}
             </Grid>
-            <ContextMenu onClick={handleLinkChange} />
+            <ContextMenu
+                menu={defaultMenu}
+                value={value}
+                onClick={handleLinkChange} />
         </Flex>
     </>
 }
