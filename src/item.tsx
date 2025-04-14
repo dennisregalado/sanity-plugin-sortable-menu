@@ -33,13 +33,13 @@ export function Item(props: ObjectItemProps) {
     const [isHovering, setIsHovering] = useState(false)
     const [collapsed, setCollapsed] = useState(false)
 
-    console.log('flattenedItem from Item', {
-        id: flattenedItem?._key,
-        index: flattenedItem?.index,
-        depth: flattenedItem?.depth,
-        parentId: flattenedItem?.parentId,
-    })
+    const depth = useMemo(() => {
+        return flattenedItem?.depth ?? 0
+    }, [flattenedItem])
 
+    const index = useMemo(() => {
+        return flattenedItem?.index ?? 0
+    }, [flattenedItem])
 
     const { ref, handleRef, isDragSource, isDragging } = useSortable({
         alignment: {
@@ -49,10 +49,10 @@ export function Item(props: ObjectItemProps) {
         transition: {
             idle: true,
         },
-        id: flattenedItem?._key,
-        index: flattenedItem?.index,
+        id: value._key,
+        index: index,
         data: {
-            depth: flattenedItem?.depth,
+            depth: depth,
             parentId: flattenedItem?.parentId,
         },
     });
@@ -60,10 +60,11 @@ export function Item(props: ObjectItemProps) {
 
     return <>
         <div ref={ref} aria-hidden={isDragSource} style={{
+            marginLeft: depth ? depth * 50 : 0,
             ...(isDragging && {
                 zIndex: 5,
                 position: 'relative',
-            }),
+            })
         }}>
             <TreeItemProvider value={{ isEditing, setIsEditing, isHovering, setIsHovering }}>
                 <Card

@@ -6,13 +6,10 @@ export interface Reference {
 export interface Item {
   _type: 'menuItem';
   _key: string;
-  id: string;
   label?: string;
   url?: string;
   reference?: Reference;
   children?: Item[];
-  collapsed?: boolean;
-  isEditing?: boolean;
 }
 
 export interface FlattenedItem extends Item {

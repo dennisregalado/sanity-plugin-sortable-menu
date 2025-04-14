@@ -16,18 +16,32 @@ const INDENTATION = 50;
 
 export function TreeInput(props: ArrayOfObjectsInputProps) {
 
-    const { onChange, path, onItemAppend } = props;
+    const { onChange, path, onItemAppend, value } = props;
 
     const isRoot = useMemo(() => path.length === 1, [path])
-    const hasChildren = useMemo(() => props.value && props.value.length > 0, [props.value])
+    const hasChildren = useMemo(() => value && value.length > 0, [value])
     const parentPath = useMemo(() => path.slice(0, -1), [path])
-    const parentValue = useFormValue(parentPath)
+    const parentValue = useFormValue(parentPath) as { label?: string } | undefined;
+
+    const parentDepth = useMemo(() => {
+        return path.reduce<number>((acc, curr) => {
+
+            if (curr === 'children') {
+                return acc + 1;
+            }
+
+            return acc
+        }, 0)
+    }, [path])
 
     const onAddItem = useCallback(
         async () => {
             const item = {
                 _key: randomKey(12),
                 _type: 'menuItem',
+                parentId: parentValue?._key,
+                depth: parentDepth,
+                index: value?.length || 0,
             };
 
             onItemAppend(item)
@@ -38,7 +52,7 @@ export function TreeInput(props: ArrayOfObjectsInputProps) {
     return isRoot ? <RootTree indentation={INDENTATION} onChange={(items) => {
         onChange(set(items));
     }}
-        items={props.value || []}>
+        items={(value || []) as Item[]}>
         {props.members.map((member) => {
             if (member.kind === 'item') {
                 return (
@@ -67,7 +81,11 @@ export function TreeInput(props: ArrayOfObjectsInputProps) {
 
             return <MemberItemError key={member.key} member={member} />
         })}
-        {hasChildren && <NewTreeItem text={parentValue?.label && `Add menu item to ${parentValue.label}` || 'Add menu item'} addItem={onAddItem} />}
+        {hasChildren && <div style={{
+            marginLeft: parentDepth * INDENTATION,
+        }}>
+            <NewTreeItem text={parentValue?.label && `Add menu item to ${parentValue.label}` || 'Add menu item'} addItem={onAddItem} />
+        </div>}
     </>
 }
 
@@ -95,7 +113,7 @@ function RootTree({
 
             if (!source) return;
 
-            const { depth } = flattenedItems.find(({ id }) => id === source.id)!;
+            const { depth } = flattenedItems.find(({ _key }) => _key === source.id)!;
 
             setFlattenedItems((flattenedItems) => {
                 sourceChildren.current = [];
@@ -129,12 +147,16 @@ function RootTree({
                             projectedDepth
                         );
 
-                        const sortedItems = move(flattenedItems, event);
-                        const newItems = sortedItems.map((item) =>
-                            item.id === source.id ? { ...item, depth, parentId } : item
-                        );
+                        // Map _key to id for dnd-kit compatibility
+                        const itemsWithId = flattenedItems.map(item => ({ ...item, id: item._key }));
+                        const sortedItemsWithId = move(itemsWithId, event);
+                        // Map id back to _key and update the moved item
+                        const newItems = sortedItemsWithId.map((item: FlattenedItem & { id: string }) => {
+                            const { id, ...rest } = item; // Remove the temporary id field
+                            return item._key === source.id ? { ...rest, depth, parentId } : rest;
+                        });
 
-                        return newItems;
+                        return newItems as FlattenedItem[]; // Assert type back to FlattenedItem[]
                     });
                 }
             }}
@@ -188,8 +210,8 @@ function RootTree({
                         source.data!.parentId !== parentId
                     ) {
                         setFlattenedItems((flattenedItems) => {
-                            return flattenedItems.map((item) =>
-                                item.id === source.id ? { ...item, depth, parentId } : item
+                            return flattenedItems.map((item: FlattenedItem) => // Add explicit type
+                                item._key === source.id ? { ...item, depth, parentId } : item
                             );
                         });
                     }
@@ -209,9 +231,8 @@ function RootTree({
 
                 onChange(updatedTree);
             }}>
-
             <Card border={true} padding={1} radius={2}>
-                <Grid gap={1} as="ul">
+                <Grid gap={1}>
                     <TreeProvider value={{ flattenedItems, setFlattenedItems }}>
                         {children}
                     </TreeProvider>
