@@ -57,6 +57,18 @@ export const defaultMenu = [
     }
 ]
 export function ItemInput(props: ObjectInputProps) {
+
+    console.log('props', props.members)
+
+    return <>
+        <code>itemInput.tsx</code>
+        {props.renderDefault({
+            ...props,
+            members: props.members.filter((member) => member.name == 'children')
+        })}
+    </>
+
+
     const { members, onChange, value, path } = props;
 
     const handleLinkChange = useCallback((item: { label: string, value: string }) => {
@@ -68,7 +80,7 @@ export function ItemInput(props: ObjectInputProps) {
             _type: 'menuItem',
             url: item.value,
             label,
-        } : {
+        } : { 
             label,
             _type: 'menuItem',
             url: item.value,
@@ -76,6 +88,7 @@ export function ItemInput(props: ObjectInputProps) {
     }, [onChange, value, path]);
 
     return <>
+        <code>itemInput.tsx</code>
         <style>
             {`
                 #item-input [data-ui="fieldHeaderContentBox"] {

@@ -8,6 +8,8 @@ import { TreeItemProvider, useTreeItem } from '../hooks/useTreeItem';
 export interface Props extends FlattenedItem {
   onRemove?(): void;
   editing?: React.ReactNode;
+  collapsed?: boolean;
+  onCollapse?(isCollapsed: boolean): void;
 }
 
 const INDENTATION = 50;
@@ -22,10 +24,8 @@ const config = {
   },
 } as const;
 
-export function TreeItem({ depth, id, index, parentId, onRemove, label = '', url = '', editing, children = [] }: Props) {
-  const [collapsed, setCollapsed] = useState(false);
-
-  const { ref, handleRef, isDragSource, isDragging } = useSortable({
+export function TreeItem({ depth, id, index, parentId, onRemove, label = '', url = '', editing, children = [], collapsed = false, onCollapse }: Props) {
+  const { ref, handleRef, isDragSource, isDragging, isDropping, isDropTarget } = useSortable({
     ...config,
     id,
     index,
@@ -34,6 +34,14 @@ export function TreeItem({ depth, id, index, parentId, onRemove, label = '', url
       parentId,
     },
   });
+
+  const dragButton = handleRef ? (
+    <Button ref={handleRef} paddingX={2} mode="bleed" icon={DragHandleIcon} style={{ cursor: 'all-scroll' }} />
+  ) : undefined;
+
+  const removeButton = onRemove ? (
+    <Button mode="bleed" paddingX={2} icon={TrashIcon} tone="critical" onClick={onRemove} />
+  ) : undefined;
 
   return (
     <TreeItemProvider>
@@ -54,9 +62,9 @@ export function TreeItem({ depth, id, index, parentId, onRemove, label = '', url
           hasChildren={children.length > 0}
           isDragging={isDragging}
           collapsed={collapsed}
-          toggleCollapse={() => setCollapsed(!collapsed)}
-          removeButton={<Button mode="bleed" paddingX={2} icon={TrashIcon} tone="critical" onClick={onRemove} />}
-          dragButton={<Button ref={handleRef} paddingX={2} mode="bleed" icon={DragHandleIcon} style={{ cursor: 'all-scroll' }} />}
+          toggleCollapse={() => onCollapse?.(!collapsed)}
+          removeButton={removeButton}
+          dragButton={dragButton}
         >
           {editing}
         </MenuItem>
@@ -65,7 +73,19 @@ export function TreeItem({ depth, id, index, parentId, onRemove, label = '', url
   );
 }
 
-export function MenuItem({ removeButton, dragButton, isDragging, children, hasChildren, collapsed, toggleCollapse }: { removeButton?: React.ReactNode, dragButton?: React.ReactNode, isDragging: boolean, label: string, children: React.ReactNode, hasChildren: boolean, url: string, collapsed: boolean, toggleCollapse: () => void }) {
+interface MenuItemProps {
+  removeButton?: React.ReactElement;
+  dragButton?: React.ReactElement;
+  isDragging: boolean;
+  label: string;
+  children: React.ReactNode;
+  hasChildren: boolean;
+  url: string;
+  collapsed: boolean;
+  toggleCollapse: () => void;
+}
+
+export function MenuItem({ removeButton, dragButton, isDragging, children, hasChildren, collapsed, toggleCollapse }: MenuItemProps) {
   const { isEditing, setIsEditing, isHovering, setIsHovering, validation } = useTreeItem();
 
   return <Card
@@ -77,31 +97,32 @@ export function MenuItem({ removeButton, dragButton, isDragging, children, hasCh
     onMouseLeave={() => setIsHovering(false)}
   >
     <Flex gap={1} width="fill" align={isEditing ? 'flex-end' : 'center'} paddingBottom={isEditing ? 3 : 0}>
-
-      <Tooltip
-        content={
-          <Text muted size={1}>
-            Drag to reorder
-          </Text>
-        }
-        animate
-        fallbackPlacements={['right', 'left']}
-        placement="top"
-        portal
-      >
-        {dragButton}
-      </Tooltip>
+      {dragButton && (
+        <Tooltip
+          content={
+            <Text size={1}>
+              Drag to re-order
+            </Text>
+          }
+          animate
+          fallbackPlacements={['right', 'left']}
+          placement="bottom"
+          portal
+        >
+          {dragButton}
+        </Tooltip>
+      )}
 
       {hasChildren && (
         <Tooltip
           content={
-            <Text muted size={1}>
+            <Text size={1}>
               {collapsed ? 'Expand' : 'Collapse'}
             </Text>
           }
           animate
           fallbackPlacements={['right', 'left']}
-          placement="top"
+          placement="bottom"
           portal
         >
           <Button mode="bleed" paddingX={2} icon={collapsed ? ChevronRightIcon : ChevronDownIcon} onClick={toggleCollapse} />
@@ -114,7 +135,7 @@ export function MenuItem({ removeButton, dragButton, isDragging, children, hasCh
           }
         `}
       </style>
-      <Flex width="fill" className='w-full' style={{ width: '100%' }} id='menu-item'>
+      <Flex width="fill" style={{ width: '100%' }} id='menu-item'>
         {children}
       </Flex>
       {validation && !isHovering && !isEditing ? (
@@ -123,31 +144,31 @@ export function MenuItem({ removeButton, dragButton, isDragging, children, hasCh
             <ErrorOutlineIcon />
           </Text>
         </Box>
-      ) : (isHovering || isEditing) && (
-        <Flex gap={1} className='shrink-0'>
+      ) : (isHovering || isEditing) && removeButton && (
+        <Flex gap={1} style={{ flexShrink: 0 }}>
           {isEditing ?
             <Tooltip
               content={
-                <Text muted size={1}>
-                  Close
+                <Text size={1}>
+                  Preview
                 </Text>
               }
               animate
               fallbackPlacements={['right', 'left']}
-              placement="top"
+              placement="bottom"
               portal
             >
               <Button paddingX={2} mode="bleed" icon={CheckmarkIcon} onClick={() => setIsEditing(false)} />
             </Tooltip> :
             <Tooltip
               content={
-                <Text muted size={1}>
+                <Text size={1}>
                   Edit
                 </Text>
               }
               animate
               fallbackPlacements={['right', 'left']}
-              placement="top"
+              placement="bottom"
               portal
             >
               <Button paddingX={2} mode="bleed" icon={EditIcon} onClick={() => setIsEditing(true)} />
@@ -155,13 +176,13 @@ export function MenuItem({ removeButton, dragButton, isDragging, children, hasCh
           }
           <Tooltip
             content={
-              <Text muted size={1}>
+              <Text size={1}>
                 Remove
               </Text>
             }
             animate
             fallbackPlacements={['right', 'left']}
-            placement="top"
+            placement="bottom"
             portal
           >
             {removeButton}
@@ -169,5 +190,5 @@ export function MenuItem({ removeButton, dragButton, isDragging, children, hasCh
         </Flex>
       )}
     </Flex>
-  </Card >
+  </Card>
 }

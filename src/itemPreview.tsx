@@ -13,6 +13,9 @@ export function ItemPreview(props: PreviewProps) {
     const { setIsEditing } = useTreeItem();
 
     return (
+        <>
+        <code>itemPreview.tsx</code>
+         
         <Button
             mode="bleed"
             width="fill"
@@ -29,6 +32,6 @@ export function ItemPreview(props: PreviewProps) {
                     {title || 'Untitled'}
                 </Text>
             </Flex>
-        </Button>
+        </Button></>
     );
 }

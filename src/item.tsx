@@ -1,19 +1,18 @@
 import React, { useEffect } from 'react';
 import { useTreeItem } from './hooks/useTreeItem';
-import { ObjectItemProps } from 'sanity';
+import { ObjectItemProps, set } from 'sanity';
 import { getToneFromValidation } from './validation';
 
 export function Item(props: ObjectItemProps) {
+    const { children: Children, ...rest } = props;
     const { isEditing, setValidation } = useTreeItem();
 
     const inlineProps = {
         ...props.inputProps,
-        members: props.inputProps.members.filter((m) => true),
-        value: props.value,
     }
 
     useEffect(() => {
-        const member = props.inputProps.members[0] 
+        const member = props.inputProps.members[0]
 
         if (member && member?.field) {
             setValidation(getToneFromValidation(member.field?.validation))
@@ -21,11 +20,16 @@ export function Item(props: ObjectItemProps) {
         }
     }, [props.inputProps.members])
 
+
     return <>
+        <code>item.tsx</code>
+        {props.renderDefault(props)}
         {isEditing ? (
-            inlineProps.renderInput(inlineProps)
+            inlineProps.renderInput(props.inputProps)
         ) : (
             inlineProps.renderPreview(inlineProps)
         )}
+        <code>children</code>
+        {inlineProps.renderInput(props.inputProps)}
     </>
-}
+} 

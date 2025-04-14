@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { randomKey } from '@sanity/util/content';
 import { ArrayOfObjectsInputProps, ArrayOfObjectsItem, ArrayOfObjectsInputMembers, ArrayOfObjectOptionsInput, ArrayOfObjectsInputMember, MemberField, MemberItemError } from 'sanity';
 import { set } from 'sanity';
@@ -101,5 +101,58 @@ export function MenuInput(props: ArrayOfObjectsInputProps) {
         onChange(set(items));
     }
 
-    return <Tree context={props} members={props.members} maxDepth={maxDepth} items={newItems} onChange={handleChange} />
+    function traverseMembers(member: any, currentDepth: number = 0) {
+        if (currentDepth >= maxDepth) {
+            return [];
+        }
+
+        const childrenMenu = member.item.members.find((child) => child.name === 'children');
+
+        if (!childrenMenu || !childrenMenu.field.members) {
+            return [shapeMember(member, childrenMenu.field)];
+        }
+
+        return childrenMenu.field.members.reduce((acc, member) => {
+            const childMembers = traverseMembers(member, currentDepth + 1);
+            return [...acc, shapeMember(member, childrenMenu.field), ...childMembers];
+        }, []);
+    }
+
+    function shapeMember(member: any, parentProps: any) {
+        if (parentProps) { 
+            return {
+                ...member,
+                collapsed: false,
+                parentProps: {
+                    ...props,
+                    ...parentProps, 
+                }
+            }
+        }
+        return {
+            ...member,
+            collapsed: false,
+            parentProps: {
+                ...props,
+                onChange: null
+            }
+        }
+    }
+
+    const flattenedMembers = useMemo(() => {
+        return props.members.reduce((acc, member) => {
+            const childMembers = traverseMembers(member);
+
+            const shapedMember = shapeMember(member);
+
+            return [...acc, shapedMember, ...childMembers];
+        }, []);
+    }, [props.members, maxDepth]);
+
+    useEffect(() => {
+        console.log('flattenedMembers', flattenedMembers)
+    }, [flattenedMembers])
+
+    return <Tree context={props} members={flattenedMembers} maxDepth={maxDepth} items={newItems} onChange={handleChange} />
 }
+ 
