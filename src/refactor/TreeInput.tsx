@@ -1,57 +1,117 @@
-import { useRef, useState } from 'react';
-import { DragDropProvider, DragOverlay } from '@dnd-kit/react';
+import { ArrayOfObjectsInputProps, ArrayOfObjectsItem, MemberItemError } from "sanity";
+import { NewTreeItem } from '../components/NewTreeItem'
+import { randomKey } from '@sanity/util/content'
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useFormValue, set } from 'sanity'
+import { Card, Grid } from "@sanity/ui";
+import { TreeItemOverlay } from "../components/TreeItemOverlay";
+import { DragOverlay, DragDropProvider } from "@dnd-kit/react";
+import { FlattenedItem, Item } from "../types";
+import { buildTree, flattenTree, getDragDepth, getProjection } from "../utils";
 import { isKeyboardEvent } from '@dnd-kit/dom/utilities';
 import { move } from '@dnd-kit/helpers';
-import { FlattenedItem, type Item } from '../types.js';
-import {
-    flattenTree,
-    buildTree,
-    getProjection,
-    getDragDepth,
-} from '../utils.js'; 
-import { TreeItemOverlay } from './TreeItemOverlay'; 
+import { TreeProvider } from "../hooks/useTree";
 
-interface Props {
-    items: Item[];
-    indentation?: number;
-    maxDepth?: number;
-    onChange(items: Item[]): void;
-    members: Array<{ key: string; field?: any }>;
-    context: any;
+const INDENTATION = 50;
+
+export function TreeInput(props: ArrayOfObjectsInputProps) {
+
+    const { onChange, path, onItemAppend } = props;
+
+    const isRoot = useMemo(() => path.length === 1, [path])
+    const hasChildren = useMemo(() => props.value && props.value.length > 0, [props.value])
+    const parentPath = useMemo(() => path.slice(0, -1), [path])
+    const parentValue = useFormValue(parentPath)
+
+    const onAddItem = useCallback(
+        async () => {
+            const item = {
+                _key: randomKey(12),
+                _type: 'menuItem',
+            };
+
+            onItemAppend(item)
+        },
+        [onChange],
+    );
+
+    return isRoot ? <RootTree indentation={INDENTATION} onChange={(items) => {
+        onChange(set(items));
+    }}
+        items={props.value || []}>
+        {props.members.map((member) => {
+            if (member.kind === 'item') {
+                return (
+                    <ArrayOfObjectsItem
+                        {...props}
+                        key={member.key}
+                        member={member}
+                    />
+                )
+            }
+
+            return <MemberItemError key={member.key} member={member} />
+        })}
+        <NewTreeItem addItem={onAddItem} />
+    </RootTree> : <>
+        {props.members.map((member) => {
+            if (member.kind === 'item') {
+                return (
+                    <ArrayOfObjectsItem
+                        {...props}
+                        key={member.key}
+                        member={member}
+                    />
+                )
+            }
+
+            return <MemberItemError key={member.key} member={member} />
+        })}
+        {hasChildren && <NewTreeItem text={parentValue?.label && `Add menu item to ${parentValue.label}` || 'Add menu item'} addItem={onAddItem} />}
+    </>
 }
 
-export function Tree({ items, indentation = 50, maxDepth = 5, onChange }: Props) {
+function RootTree({
+    indentation = 50,
+    onChange,
+    children,
+    items = []
+}: {
+    onChange: (items: Item[]) => void
+    items: Item[]
+    children: React.ReactNode
+    indentation?: number
+}) {
+
     const [flattenedItems, setFlattenedItems] = useState<FlattenedItem[]>(() =>
         flattenTree(items)
     );
- 
-    const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
-
     const initialDepth = useRef(0);
-    const sourceChildren = useRef<FlattenedItem[]>([]); 
+    const sourceChildren = useRef<FlattenedItem[]>([]);
 
-    return (
-        <DragDropProvider
-            onDragStart={(event) => {
-                const { source } = event.operation;
-                if (!source) return;
+    return <>
+        <DragDropProvider onDragStart={(event) => {
+            const { source } = event.operation;
 
-                const { depth } = flattenedItems.find(({ id }) => id === source.id)!;
-                setDraggedItemId(source.id as string);
+            if (!source) return;
 
-                setFlattenedItems((flattenedItems) => {
-                    sourceChildren.current = [];
-                    return flattenedItems.filter((item) => {
-                        if (item.parentId === source.id) {
-                            sourceChildren.current = [...sourceChildren.current, item];
-                            return false;
-                        }
-                        return true;
-                    });
+            const { depth } = flattenedItems.find(({ id }) => id === source.id)!;
+
+            setFlattenedItems((flattenedItems) => {
+                sourceChildren.current = [];
+
+                return flattenedItems.filter((item) => {
+                    if (item.parentId === source.id) {
+                        sourceChildren.current = [...sourceChildren.current, item];
+                        return false;
+                    }
+
+                    return true;
                 });
+            });
 
-                initialDepth.current = depth;
-            }}
+            initialDepth.current = depth;
+        }}
             onDragOver={(event, manager) => {
                 const { source, target } = event.operation;
 
@@ -62,13 +122,6 @@ export function Tree({ items, indentation = 50, maxDepth = 5, onChange }: Props)
                         const offsetLeft = manager.dragOperation.transform.x;
                         const dragDepth = getDragDepth(offsetLeft, indentation);
                         const projectedDepth = initialDepth.current + dragDepth;
-
-
-                        // Prevent dragging items beyond the maximum allowed depth
-                        // If the projected depth would exceed maxDepth, return the current state unchanged
-                        if (projectedDepth > maxDepth) {
-                            return flattenedItems;
-                        }
 
                         const { depth, parentId } = getProjection(
                             flattenedItems,
@@ -104,12 +157,6 @@ export function Tree({ items, indentation = 50, maxDepth = 5, onChange }: Props)
                             event.preventDefault();
 
                             keyboardDepth = currentDepth + Math.sign(event.by!.x);
-
-                            // Prevent keyboard navigation beyond maxDepth
-                            // If the keyboard navigation would take the item beyond maxDepth, cancel the operation
-                            if (keyboardDepth > maxDepth) {
-                                return;
-                            }
                         }
                     }
 
@@ -118,13 +165,6 @@ export function Tree({ items, indentation = 50, maxDepth = 5, onChange }: Props)
 
                     const projectedDepth =
                         keyboardDepth ?? initialDepth.current + dragDepth;
-
-
-                    // Prevent dragging beyond maxDepth
-                    // If the projected depth would exceed maxDepth, cancel the drag operation
-                    if (projectedDepth > maxDepth) {
-                        return;
-                    }
 
                     const { depth, parentId } = getProjection(
                         flattenedItems,
@@ -156,8 +196,6 @@ export function Tree({ items, indentation = 50, maxDepth = 5, onChange }: Props)
                 }
             }}
             onDragEnd={(event) => {
-                setDraggedItemId(null);
-
                 if (event.canceled) {
                     return setFlattenedItems(flattenTree(items));
                 }
@@ -168,14 +206,22 @@ export function Tree({ items, indentation = 50, maxDepth = 5, onChange }: Props)
                 ]);
 
                 setFlattenedItems(flattenTree(updatedTree));
+
                 onChange(updatedTree);
-            }}
-        >
+            }}>
+
+            <Card border={true} padding={1} radius={2}>
+                <Grid gap={1} as="ul">
+                    <TreeProvider value={{ flattenedItems, setFlattenedItems }}>
+                        {children}
+                    </TreeProvider>
+                </Grid>
+            </Card>
             <DragOverlay style={{ width: 'min-content' }}>
                 {(source) => (
                     <TreeItemOverlay {...source} children={sourceChildren.current} />
                 )}
             </DragOverlay>
         </DragDropProvider>
-    );
+    </>
 }

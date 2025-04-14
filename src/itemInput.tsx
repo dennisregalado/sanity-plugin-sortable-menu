@@ -1,6 +1,5 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Flex, Grid, Text } from '@sanity/ui';
-import { CogIcon, CopyIcon, UserIcon, BasketIcon, SearchIcon, EarthGlobeIcon, HomeIcon } from "@sanity/icons";
 import { ObjectInputProps, set } from 'sanity';
 import { ContextMenu } from './components/ContextMenu';
 
@@ -58,17 +57,16 @@ export const defaultMenu = [
 ]
 export function ItemInput(props: ObjectInputProps) {
 
-    console.log('props', props.members)
+    const isChildrenMember = useMemo(() => {
+        return props.members.some((member) => member.kind === 'field' && member.name === 'children')
+    }, [props.members])
 
-    return <>
-        <code>itemInput.tsx</code>
-        {props.renderDefault({
-            ...props,
-            members: props.members.filter((member) => member.name == 'children')
-        })}
-    </>
-
-
+    if (isChildrenMember) {
+        return <>
+            {props.renderDefault(props)}
+        </>
+    } 
+    
     const { members, onChange, value, path } = props;
 
     const handleLinkChange = useCallback((item: { label: string, value: string }) => {
@@ -88,7 +86,6 @@ export function ItemInput(props: ObjectInputProps) {
     }, [onChange, value, path]);
 
     return <>
-        <code>itemInput.tsx</code>
         <style>
             {`
                 #item-input [data-ui="fieldHeaderContentBox"] {

@@ -14,8 +14,6 @@ export function ItemPreview(props: PreviewProps) {
 
     return (
         <>
-        <code>itemPreview.tsx</code>
-         
         <Button
             mode="bleed"
             width="fill"

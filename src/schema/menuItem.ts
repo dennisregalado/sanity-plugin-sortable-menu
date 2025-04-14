@@ -3,7 +3,8 @@ import { ItemInput } from "../itemInput";
 import { Item } from "../item";
 import { ItemPreview } from "../itemPreview";
 import { defaultMenu } from "../itemInput";
-import { TestItem } from "../testItem";
+import { TreeInput } from "../refactor/TreeInput";
+import { TreeField } from "../refactor/TreeField";
 
 export const menuItem = defineType({
     name: 'menuItem',
@@ -11,7 +12,7 @@ export const menuItem = defineType({
     components: {
         input: ItemInput,
         item: Item,
-        preview: ItemPreview,
+        preview: ItemPreview
     },
     type: 'object',
     fieldsets: [{ name: 'advanced', title: 'Advanced' }],
@@ -64,9 +65,12 @@ export const menuItem = defineType({
             fieldset: 'advanced',
         }),
         defineField({
-            //    hidden: true,
             type: 'array',
             name: 'children',
+            components: {
+                input: TreeInput,
+                field: TreeField,
+            },
             title: 'Children',
             of: [defineArrayMember({ type: 'menuItem' })]
         }),
