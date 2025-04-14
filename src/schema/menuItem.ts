@@ -1,6 +1,6 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { BlockElementIcon, } from '@sanity/icons';
-import { ItemInput } from "../itemInput";
+import { defaultMenu, ItemInput } from "../itemInput";
 import { Item } from "../item";
 import { ItemPreview } from "../itemPreview";
 export const menuItem = defineType({
@@ -110,10 +110,28 @@ export const menuItem = defineType({
             url: 'url',
             media: 'reference.image',
         },
-        prepare({ title, media }) {
+        prepare({ title, media, url }) {
+            interface MenuItem {
+                value?: string;
+                icon?: any;
+                children?: MenuItem[];
+            }
+
+            const findMenuItem = (items: MenuItem[]): MenuItem | null => {
+                return items.reduce((acc: MenuItem | null, item: MenuItem) => {
+                    if (acc) return acc;
+                    if (item.value === url) return item;
+                    if (item.children) return findMenuItem(item.children);
+                    return null;
+                }, null);
+            };
+
+            const matchingItem = findMenuItem(defaultMenu);
+            const icon = matchingItem?.icon;
+
             return {
                 title,
-                media: media || BlockElementIcon
+                media: icon || media
             };
         },
     },
