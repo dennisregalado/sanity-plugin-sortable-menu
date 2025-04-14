@@ -1,7 +1,7 @@
 // @ts-nocheck
-import {UniqueIdentifier} from '@dnd-kit/abstract';
+import { UniqueIdentifier } from '@dnd-kit/abstract';
 
-import type {Item, FlattenedItem} from './types.js';
+import type { Item, FlattenedItem } from './types.ts';
 
 export function flattenTree(
   items: Item[],
@@ -9,28 +9,28 @@ export function flattenTree(
   depth = 0
 ): FlattenedItem[] {
   if (!items) return [];
-  return items?.reduce<FlattenedItem[]>((acc, item, index) => {
+  return items.reduce<FlattenedItem[]>((acc, item, index) => {
     return [
       ...acc,
-      {...item, parentId, depth, index},
+      { ...item, parentId, depth, index },
       ...flattenTree(item.children, item.id, depth + 1),
     ];
   }, []);
 }
 
 export function buildTree(flattenedItems: FlattenedItem[]): Item[] {
-  const root: Item = {id: 'root', children: []};
-  const nodes: Record<string, Item> = {[root.id]: root};
-  const items = flattenedItems.map((item) => ({...item, children: []}));
+  const root: Item = { id: 'root', children: [] };
+  const nodes: Record<string, Item> = { [root.id]: root };
+  const items = flattenedItems.map((item) => ({ ...item, children: [] }));
 
   for (const item of items) {
-    const {id, children} = item;
+    const { id, children } = item;
     const parentId = item.parentId ?? root.id;
-    const parent = nodes[parentId] ?? items.find(({id}) => id === parentId);
+    const parent = nodes[parentId] ?? items.find(({ id }) => id === parentId);
 
     if (!parent) continue;
 
-    nodes[id] = {id, children};
+    nodes[id] = { id, children };
     parent.children.push(item);
   }
 
@@ -46,7 +46,7 @@ export function getProjection(
   targetId: UniqueIdentifier,
   projectedDepth: number
 ) {
-  const targetItemIndex = items.findIndex(({id}) => id === targetId);
+  const targetItemIndex = items.findIndex(({ id }) => id === targetId);
   const previousItem = items[targetItemIndex - 1];
   const targetItem = items[targetItemIndex];
   const nextItem = items[targetItemIndex + 1];
@@ -60,7 +60,7 @@ export function getProjection(
     depth = minDepth;
   }
 
-  return {depth, maxDepth, minDepth, parentId: getParentId()};
+  return { depth, maxDepth, minDepth, parentId: getParentId() };
 
   function getParentId() {
     if (depth === 0 || !previousItem) {

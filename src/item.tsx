@@ -59,7 +59,12 @@ export function Item(props: ObjectItemProps) {
 
 
     return <>
-        <div ref={ref} aria-hidden={isDragSource}>
+        <div ref={ref} aria-hidden={isDragSource} style={{
+            ...(isDragging && {
+                zIndex: 5,
+                position: 'relative',
+            }),
+        }}>
             <TreeItemProvider value={{ isEditing, setIsEditing, isHovering, setIsHovering }}>
                 <Card
                     padding={1}
