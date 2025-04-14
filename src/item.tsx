@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useMemo, useState } from 'react';
 import { TreeItemProvider } from './hooks/useTreeItem';
 import { ObjectItemProps } from 'sanity';

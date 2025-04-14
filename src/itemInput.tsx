@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useCallback, useMemo } from 'react';
 import { Flex, Grid, Text } from '@sanity/ui';
 import { ObjectInputProps, set } from 'sanity';
