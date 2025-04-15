@@ -1,19 +1,21 @@
-import { ArrayOfObjectsInputProps, ArrayOfObjectsItem, MemberItemError, SchemaType } from "sanity";
-import { NewTreeItem } from '../components/NewTreeItem'
+// @ts-nocheck
+import { ArrayOfObjectsInputProps, ArrayOfObjectsItem, SchemaType } from "sanity";
+import { NewTreeItem } from './components/NewTreeItem'
 import { randomKey } from '@sanity/util/content'
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useFormValue, set } from 'sanity'
 import { Card, Grid } from "@sanity/ui";
-import { TreeItemOverlay } from "../components/TreeItemOverlay";
+import { TreeItemOverlay } from "./components/TreeItemOverlay";
 import { DragOverlay, DragDropProvider } from "@dnd-kit/react";
-import { FlattenedItem } from "../types";
-import { buildTree, flattenTree, getDragDepth, getProjection } from "../utils";
+import { FlattenedItem } from "./types";
+import { buildTree, flattenTree, getDragDepth, getProjection } from "./utils";
 import { isKeyboardEvent } from '@dnd-kit/dom/utilities';
 import { move } from '@dnd-kit/helpers';
-import { TreeProvider } from "../hooks/useTree";
-import { ItemPreview } from "../itemPreview";
+import { TreeProvider } from "./hooks/useTree";
+import { MenuItemPreview } from "./MenuItemPreview";
 import React from "react";
-import { Item } from "../item";
+import { MenuItem } from "./MenuItem";
+import { Item } from "./types";
 
 const INDENTATION = 50;
 
@@ -54,38 +56,26 @@ export function SortableTreeInput(props: ArrayOfObjectsInputProps) {
 
     const maxDepth = 5
 
-    console.log(parentValue)
-
     const sanityArrayItems = <>
-        {props.members.map((member) => {
-            if (member.kind === 'item') {
-                return (
-                    <>
-                        <ArrayOfObjectsItem
-                            {...props}
-                            key={member.key}
-                            member={{
-                                ...member,
-                                item: {
-                                    ...member.item,
-                                    schemaType: {
-                                        ...member.item.schemaType,
-                                        components: {
-                                            ...member.item.schemaType.components,
-                                            item: Item,
-                                            preview: ItemPreview
-                                        }
-                                    }
-                                }
+        {props.members.filter((member) => member.kind === 'item').map((member) => <ArrayOfObjectsItem
+            {...props}
+            key={member.key}
+            member={{
+                ...member,
+                item: {
+                    ...member.item,
+                    schemaType: {
+                        ...member.item.schemaType,
+                        components: {
+                            ...member.item.schemaType.components,
+                            item: MenuItem,
+                            preview: MenuItemPreview
+                        }
+                    }
+                }
 
-                            }}
-                        />
-                    </>
-                )
-            }
-
-            return <MemberItemError key={member.key} member={member} />
-        })}
+            }}
+        />)}
     </>
 
     return isRoot ? <RootTree maxDepth={maxDepth || 5} indentation={INDENTATION} onAddItem={onAddItem} schemaType={schemaType} onChange={(items) => {

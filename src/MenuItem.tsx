@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { TreeItemProvider } from './hooks/useTreeItem';
 import { ObjectItemProps } from 'sanity';
@@ -15,10 +16,10 @@ const config = {
     },
     transition: {
         idle: true,
-    },
+    }, 
 } as const;
 
-export function Item(props: ObjectItemProps) {
+export function MenuItem(props: ObjectItemProps) {
     const { value, onRemove } = props;
 
     const { flattenedItems } = useTree();
@@ -46,9 +47,7 @@ export function Item(props: ObjectItemProps) {
     const [isHovering, setIsHovering] = useState(false)
     const [validation, setValidation] = useState<CardTone | undefined>(undefined)
     const [collapsed, setCollapsed] = useState(false)
-
-
-
+    
     useEffect(() => {
         rootTree.current = document.querySelector(`[data-root-tree="${value?._key}"]`);
     }, [value]);

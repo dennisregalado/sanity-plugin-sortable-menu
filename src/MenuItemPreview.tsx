@@ -8,7 +8,7 @@ type ItemPreviewProps = Omit<PreviewProps, 'media'> & {
     title?: string;
 };
 
-export function ItemPreview(props: PreviewProps) {
+export function MenuItemPreview(props: PreviewProps) {
     const { title, media: Media } = props as ItemPreviewProps;
     const { setIsEditing } = useTreeItem();
 

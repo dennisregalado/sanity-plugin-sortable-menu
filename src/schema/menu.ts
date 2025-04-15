@@ -1,5 +1,5 @@
 import { defineArrayMember, defineType } from "sanity";
-import { SortableTreeInput } from "../refactor/TreeInput"; 
+import { SortableTreeInput } from "../SortableTreeInput"; 
 
 export const menu = defineType({
     name: 'menu',

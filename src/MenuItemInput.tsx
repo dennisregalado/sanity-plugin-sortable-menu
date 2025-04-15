@@ -56,7 +56,7 @@ export const defaultMenu = [
         ]
     }
 ]
-export function ItemInput(props: ObjectInputProps) {
+export function MenuItemInput(props: ObjectInputProps) {
 
     const isChildrenMember = useMemo(() => {
         return props.members.some((member) => member.kind === 'field' && member.name === 'children')

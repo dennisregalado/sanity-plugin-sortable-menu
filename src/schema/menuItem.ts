@@ -1,18 +1,14 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { ItemInput } from "../itemInput";
-import { Item } from "../item";
-import { ItemPreview } from "../itemPreview";
-import { defaultMenu } from "../itemInput";
-import { SortableTreeInput } from "../refactor/TreeInput";
-import { TreeField } from "../refactor/TreeField";
+import { MenuItemInput } from "../MenuItemInput";
+import { defaultMenu } from "../MenuItemInput";
+import { SortableTreeInput } from "../SortableTreeInput";
+import { SortableTreeField } from "../SortableTreeField";
 
 export const menuItem = defineType({
     name: 'menuItem',
     title: 'Menu Item',
     components: {
-        input: ItemInput,
-        item: Item,
-        preview: ItemPreview
+        input: MenuItemInput,
     },
     type: 'object',
     fieldsets: [{ name: 'advanced', title: 'Advanced' }],
@@ -69,7 +65,7 @@ export const menuItem = defineType({
             name: 'children',
             components: {
                 input: SortableTreeInput,
-                field: TreeField,
+                field: SortableTreeField,
             },
             title: 'Children',
             of: [defineArrayMember({ type: 'menuItem' }), defineArrayMember({ type: 'image' })]
