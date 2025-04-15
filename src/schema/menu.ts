@@ -1,13 +1,14 @@
 import { defineArrayMember, defineType } from "sanity";
-import { TreeInput } from "../refactor/TreeInput"; 
+import { SortableTreeInput } from "../refactor/TreeInput"; 
 
 export const menu = defineType({
     name: 'menu',
     type: 'array',
     components: { 
-        input: TreeInput
+        input: SortableTreeInput
     },
     of: [
-        defineArrayMember({ type: 'menuItem' })
+        defineArrayMember({ type: 'menuItem' }),
+        defineArrayMember({ type: 'image' })
     ],
 })

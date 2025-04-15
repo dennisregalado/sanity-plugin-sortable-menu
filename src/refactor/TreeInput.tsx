@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { ArrayOfObjectsInputProps, ArrayOfObjectsItem, MemberItemError } from "sanity";
+import { ArrayOfObjectsInputProps, ArrayOfObjectsItem, MemberItemError, SchemaType } from "sanity";
 import { NewTreeItem } from '../components/NewTreeItem'
 import { randomKey } from '@sanity/util/content'
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -7,17 +6,20 @@ import { useFormValue, set } from 'sanity'
 import { Card, Grid } from "@sanity/ui";
 import { TreeItemOverlay } from "../components/TreeItemOverlay";
 import { DragOverlay, DragDropProvider } from "@dnd-kit/react";
-import { FlattenedItem, Item } from "../types";
+import { FlattenedItem } from "../types";
 import { buildTree, flattenTree, getDragDepth, getProjection } from "../utils";
 import { isKeyboardEvent } from '@dnd-kit/dom/utilities';
 import { move } from '@dnd-kit/helpers';
 import { TreeProvider } from "../hooks/useTree";
+import { ItemPreview } from "../itemPreview";
+import React from "react";
+import { Item } from "../item";
 
 const INDENTATION = 50;
 
-export function TreeInput(props: ArrayOfObjectsInputProps) {
+export function SortableTreeInput(props: ArrayOfObjectsInputProps) {
 
-    const { onChange, path, onItemAppend, value } = props;
+    const { onChange, path, onItemAppend, value, schemaType } = props;
 
     const isRoot = useMemo(() => path.length === 1, [path])
     const hasChildren = useMemo(() => value && value.length > 0, [value])
@@ -36,10 +38,10 @@ export function TreeInput(props: ArrayOfObjectsInputProps) {
     }, [path])
 
     const onAddItem = useCallback(
-        async () => {
+        async (type: string) => {
             const item = {
                 _key: randomKey(12),
-                _type: 'menuItem',
+                _type: type,
                 parentId: parentValue?._key,
                 depth: parentDepth,
                 index: value?.length || 0,
@@ -50,87 +52,110 @@ export function TreeInput(props: ArrayOfObjectsInputProps) {
         [onChange],
     );
 
-    return isRoot ? <RootTree indentation={INDENTATION} onChange={(items) => {
+    const maxDepth = 5
+
+    console.log(props.members)
+
+    const sanityArrayItems = <>
+        {props.members.map((member) => {
+            if (member.kind === 'item') {
+                return (
+                    <>
+                        <ArrayOfObjectsItem
+                            {...props}
+                            key={member.key}
+                            member={{
+                                ...member,
+                                item: {
+                                    ...member.item,
+                                    schemaType: {
+                                        ...member.item.schemaType,
+                                        components: {
+                                            ...member.item.schemaType.components,
+                                            item: Item,
+                                            preview: ItemPreview
+                                        }
+                                    }
+                                }
+
+                            }}
+                        />
+                    </>
+                )
+            }
+
+            return <MemberItemError key={member.key} member={member} />
+        })}
+    </>
+
+    return isRoot ? <RootTree maxDepth={maxDepth || 5} indentation={INDENTATION} onAddItem={onAddItem} schemaType={schemaType} onChange={(items) => {
         onChange(set(items));
     }}
         items={(value || []) as Item[]}>
-        {props.members.map((member) => {
-            if (member.kind === 'item') {
-                return (
-                    <ArrayOfObjectsItem
-                        {...props}
-                        key={member.key}
-                        member={member}
-                    />
-                )
-            }
-
-            return <MemberItemError key={member.key} member={member} />
-        })}
-        <NewTreeItem addItem={onAddItem} />
-    </RootTree> : <>
-        {props.members.map((member) => {
-            if (member.kind === 'item') {
-                return (
-                    <ArrayOfObjectsItem
-                        {...props}
-                        key={member.key}
-                        member={member}
-                    />
-                )
-            }
-
-            return <MemberItemError key={member.key} member={member} />
-        })}
-        {hasChildren && <div style={{
-            marginLeft: parentDepth * INDENTATION,
-        }}>
-            <NewTreeItem text={parentValue?.label && `Add menu item to ${parentValue.label}` || 'Add menu item'} addItem={onAddItem} />
-        </div>}
-    </>
+        {sanityArrayItems}
+    </RootTree> : sanityArrayItems
 }
 
 function RootTree({
+    maxDepth = 3,
     indentation = 50,
     onChange,
     children,
+    onAddItem,
+    schemaType,
     items = []
 }: {
     onChange: (items: Item[]) => void
     items: Item[]
     children: React.ReactNode
     indentation?: number
+    maxDepth?: number
+    onAddItem: (type: string) => void
+    schemaType: SchemaType
 }) {
+
 
     const [flattenedItems, setFlattenedItems] = useState<FlattenedItem[]>(() =>
         flattenTree(items)
     );
+
     const initialDepth = useRef(0);
     const sourceChildren = useRef<FlattenedItem[]>([]);
 
+    const isLastChild = (item: FlattenedItem) => {
+        const siblings = flattenedItems.filter(i => i.parentId === item.parentId);
+        return siblings[siblings.length - 1]?.id === item.id;
+    };
+
+    const getParentItem = (parentId: string | null) => {
+        return parentId ? flattenedItems.find(item => item.id === parentId) : null;
+    };
+
+
     return <>
-        <DragDropProvider onDragStart={(event) => {
-            const { source } = event.operation;
+        <DragDropProvider
+            onDragStart={(event) => {
+                const { source } = event.operation;
 
-            if (!source) return;
+                if (!source) return;
 
-            const { depth } = flattenedItems.find(({ _key }) => _key === source.id)!;
+                const { depth } = flattenedItems.find(({ id }) => id === source.id)!;
 
-            setFlattenedItems((flattenedItems) => {
-                sourceChildren.current = [];
+                setFlattenedItems((flattenedItems) => {
+                    sourceChildren.current = [];
 
-                return flattenedItems.filter((item) => {
-                    if (item.parentId === source.id) {
-                        sourceChildren.current = [...sourceChildren.current, item];
-                        return false;
-                    }
+                    return flattenedItems.filter((item) => {
+                        if (item.parentId === source.id) {
+                            sourceChildren.current = [...sourceChildren.current, item];
+                            return false;
+                        }
 
-                    return true;
+                        return true;
+                    });
                 });
-            });
 
-            initialDepth.current = depth;
-        }}
+                initialDepth.current = depth;
+            }}
             onDragOver={(event, manager) => {
                 const { source, target } = event.operation;
 
@@ -142,22 +167,25 @@ function RootTree({
                         const dragDepth = getDragDepth(offsetLeft, indentation);
                         const projectedDepth = initialDepth.current + dragDepth;
 
+
+                        // Prevent dragging items beyond the maximum allowed depth
+                        // If the projected depth would exceed maxDepth, return the current state unchanged
+                        if (projectedDepth > maxDepth) {
+                            return flattenedItems;
+                        }
+
                         const { depth, parentId } = getProjection(
                             flattenedItems,
                             target.id,
                             projectedDepth
                         );
 
-                        // Map _key to id for dnd-kit compatibility
-                        const itemsWithId = flattenedItems.map(item => ({ ...item, id: item._key }));
-                        const sortedItemsWithId = move(itemsWithId, event);
-                        // Map id back to _key and update the moved item
-                        const newItems = sortedItemsWithId.map((item: FlattenedItem & { id: string }) => {
-                            const { id, ...rest } = item; // Remove the temporary id field
-                            return item._key === source.id ? { ...rest, depth, parentId } : rest;
-                        });
+                        const sortedItems = move(flattenedItems, event);
+                        const newItems = sortedItems.map((item) =>
+                            item.id === source.id ? { ...item, depth, parentId } : item
+                        );
 
-                        return newItems as FlattenedItem[]; // Assert type back to FlattenedItem[]
+                        return newItems;
                     });
                 }
             }}
@@ -180,6 +208,12 @@ function RootTree({
                             event.preventDefault();
 
                             keyboardDepth = currentDepth + Math.sign(event.by!.x);
+
+                            // Prevent keyboard navigation beyond maxDepth
+                            // If the keyboard navigation would take the item beyond maxDepth, cancel the operation
+                            if (keyboardDepth > maxDepth) {
+                                return;
+                            }
                         }
                     }
 
@@ -188,6 +222,13 @@ function RootTree({
 
                     const projectedDepth =
                         keyboardDepth ?? initialDepth.current + dragDepth;
+
+
+                    // Prevent dragging beyond maxDepth
+                    // If the projected depth would exceed maxDepth, cancel the drag operation
+                    if (projectedDepth > maxDepth) {
+                        return;
+                    }
 
                     const { depth, parentId } = getProjection(
                         flattenedItems,
@@ -211,8 +252,8 @@ function RootTree({
                         source.data!.parentId !== parentId
                     ) {
                         setFlattenedItems((flattenedItems) => {
-                            return flattenedItems.map((item: FlattenedItem) => // Add explicit type
-                                item._key === source.id ? { ...item, depth, parentId } : item
+                            return flattenedItems.map((item) =>
+                                item.id === source.id ? { ...item, depth, parentId } : item
                             );
                         });
                     }
@@ -231,12 +272,34 @@ function RootTree({
                 setFlattenedItems(flattenTree(updatedTree));
 
                 onChange(updatedTree);
-            }}>
+            }}
+        >
+
+            <TreeProvider value={{ flattenedItems, setFlattenedItems, maxDepth, indentation }}>
+                {children}
+            </TreeProvider>
             <Card border={true} padding={1} radius={2}>
                 <Grid gap={1}>
-                    <TreeProvider value={{ flattenedItems, setFlattenedItems }}>
-                        {children}
-                    </TreeProvider>
+                    {flattenedItems.map((item) => {
+
+                        const parent = getParentItem(item.parentId);
+                        const renderAddButton = parent && isLastChild(item) && item.depth <= maxDepth;
+
+                        return (
+                            <React.Fragment key={item._key}>
+                                <div data-root-tree={item._key} style={{ display: 'contents' }}></div>
+                                {renderAddButton && (
+                                    <div style={{ marginLeft: (item.depth) * indentation, marginTop: 2 }}>
+                                        <NewTreeItem
+                                            schemaType={schemaType}
+                                            addItem={onAddItem}
+                                        />
+                                    </div>
+                                )}
+                            </React.Fragment>
+                        )
+                    })}
+                    <NewTreeItem addItem={onAddItem} schemaType={schemaType} />
                 </Grid>
             </Card>
             <DragOverlay style={{ width: 'min-content' }}>

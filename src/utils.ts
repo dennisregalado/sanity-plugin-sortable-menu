@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { UniqueIdentifier } from '@dnd-kit/abstract';
+import {UniqueIdentifier} from '@dnd-kit/abstract';
 
-import type { Item, FlattenedItem } from './types.ts';
+import type {Item, FlattenedItem} from './types.js';
 
 export function flattenTree(
   items: Item[],
@@ -9,28 +9,28 @@ export function flattenTree(
   depth = 0
 ): FlattenedItem[] {
   if (!items) return [];
-  return items.reduce<FlattenedItem[]>((acc, item, index) => {
+  return items?.reduce<FlattenedItem[]>((acc, item, index) => {
     return [
       ...acc,
-      { ...item, parentId, depth, index },
-      ...flattenTree(item.children, item._key, depth + 1),
+      {...item, parentId, depth, index},
+      ...flattenTree(item.children, item.id, depth + 1),
     ];
   }, []);
 }
 
 export function buildTree(flattenedItems: FlattenedItem[]): Item[] {
-  const root: Item = { _key: 'root', children: [] };
-  const nodes: Record<string, Item> = { [root._key]: root };
-  const items = flattenedItems.map((item) => ({ ...item, children: [] }));
+  const root: Item = {id: 'root', children: []};
+  const nodes: Record<string, Item> = {[root.id]: root};
+  const items = flattenedItems.map((item) => ({...item, children: []}));
 
   for (const item of items) {
-    const { _key, children } = item;
-    const parentId = item.parentId ?? root._key;
-    const parent = nodes[parentId] ?? items.find(({ _key }) => _key === parentId);
+    const {id, children} = item;
+    const parentId = item.parentId ?? root.id;
+    const parent = nodes[parentId] ?? items.find(({id}) => id === parentId);
 
     if (!parent) continue;
 
-    nodes[_key] = { _key, children };
+    nodes[id] = {id, children};
     parent.children.push(item);
   }
 
@@ -43,10 +43,10 @@ export function getDragDepth(offset: number, indentationWidth: number) {
 
 export function getProjection(
   items: FlattenedItem[],
-  targetKey: UniqueIdentifier,
+  targetId: UniqueIdentifier,
   projectedDepth: number
 ) {
-  const targetItemIndex = items.findIndex(({ _key }) => _key === targetKey);
+  const targetItemIndex = items.findIndex(({id}) => id === targetId);
   const previousItem = items[targetItemIndex - 1];
   const targetItem = items[targetItemIndex];
   const nextItem = items[targetItemIndex + 1];
@@ -60,7 +60,7 @@ export function getProjection(
     depth = minDepth;
   }
 
-  return { depth, maxDepth, minDepth, parentId: getParentId() };
+  return {depth, maxDepth, minDepth, parentId: getParentId()};
 
   function getParentId() {
     if (depth === 0 || !previousItem) {
@@ -72,7 +72,7 @@ export function getProjection(
     }
 
     if (depth > previousItem.depth) {
-      return previousItem._key;
+      return previousItem.id;
     }
 
     const newParent = items

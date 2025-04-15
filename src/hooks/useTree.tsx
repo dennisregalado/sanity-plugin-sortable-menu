@@ -4,6 +4,8 @@ import { FlattenedItem } from '../types';
 interface TreeContextType {
     flattenedItems: FlattenedItem[]
     setFlattenedItems: (items: FlattenedItem[]) => void
+    maxDepth: number
+    indentation: number
 }
 
 const TreeContext = createContext<TreeContextType | undefined>(undefined);

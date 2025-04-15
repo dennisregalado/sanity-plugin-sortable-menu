@@ -63,11 +63,9 @@ export function ItemInput(props: ObjectInputProps) {
     }, [props.members])
 
     if (isChildrenMember) {
-        return <>
-            {props.renderDefault(props)}
-        </>
-    } 
-    
+        return props.renderDefault(props)
+    }
+
     const { members, onChange, value, path } = props;
 
     const handleLinkChange = useCallback((item: { label: string, value: string }) => {
@@ -79,7 +77,7 @@ export function ItemInput(props: ObjectInputProps) {
             _type: 'menuItem',
             url: item.value,
             label,
-        } : { 
+        } : {
             label,
             _type: 'menuItem',
             url: item.value,
