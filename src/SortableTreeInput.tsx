@@ -134,7 +134,6 @@ function RootTree({
     return parentId ? flattenedItems.find((item) => item._key === parentId) : null
   }
 
-  console.log(flattenedItems)
   return (
     <>
       <DragDropProvider
@@ -171,6 +170,12 @@ function RootTree({
               const dragDepth = getDragDepth(offsetLeft, indentation)
               const projectedDepth = initialDepth.current + dragDepth
 
+              // Prevent dragging items beyond the maximum allowed depth
+              // If the projected depth would exceed maxDepth, return the current state unchanged
+              if (projectedDepth > maxDepth) {
+                return flattenedItems
+              }
+
               const {depth, parentId} = getProjection(flattenedItems, target.id, projectedDepth)
 
               // Map _key to id for dnd-kit compatibility
@@ -205,6 +210,12 @@ function RootTree({
                 event.preventDefault()
 
                 keyboardDepth = currentDepth + Math.sign(event.by!.x)
+
+                // Prevent keyboard navigation beyond maxDepth
+                // If the keyboard navigation would take the item beyond maxDepth, cancel the operation
+                if (keyboardDepth > maxDepth) {
+                  return
+                }
               }
             }
 
@@ -212,6 +223,12 @@ function RootTree({
             const dragDepth = getDragDepth(offsetLeft, indentation)
 
             const projectedDepth = keyboardDepth ?? initialDepth.current + dragDepth
+
+            // Prevent dragging beyond maxDepth
+            // If the projected depth would exceed maxDepth, cancel the drag operation
+            if (projectedDepth > maxDepth) {
+              return
+            }
 
             const {depth, parentId} = getProjection(flattenedItems, source.id, projectedDepth)
 

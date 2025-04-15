@@ -13,8 +13,6 @@ export function SortableItem({depth, _key, index, parentId, children}: any) {
       y: 'center',
     },
     transition: {
-      easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
-      duration: 1000,
       idle: true,
     },
     id: _key,
@@ -30,7 +28,6 @@ export function SortableItem({depth, _key, index, parentId, children}: any) {
   const [validation, setValidation] = useState<CardTone | undefined>(undefined)
   const [collapsed, setCollapsed] = useState(false)
 
-  console.log(isDragging)
   return (
     <TreeItemProvider value={{isEditing, setIsEditing, isHovering, setIsHovering}}>
       <div

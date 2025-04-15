@@ -6,8 +6,6 @@ interface PluginConfig {
   /* nothing here yet */
 }
 
-console.log('hello')
-
 export const sortableMenu = definePlugin<PluginConfig | void>((config = {}) => {
   // eslint-disable-next-line no-console
   return {
