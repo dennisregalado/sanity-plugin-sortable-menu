@@ -83,7 +83,7 @@ export function MenuItem(props: ObjectItemProps) {
     // Cleanup function to clear the timeout if the component unmounts
     // or dependencies change before the timeout executes.
     return () => clearTimeout(timer);
-  }, []) // Ensure dependency array is correct
+  }, [props.inputId]) // Ensure dependency array is correct
 
   useEffect(() => {
     const member = props.inputProps.members[0]
