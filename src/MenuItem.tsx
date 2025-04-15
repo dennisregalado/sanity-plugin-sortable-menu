@@ -1,7 +1,7 @@
 // @ts-nocheck
-import React, {useMemo, useState, useRef, useEffect} from 'react'
-import {TreeItemProvider, useTreeItem} from './hooks/useTreeItem'
-import {ObjectItemProps} from 'sanity'
+import React, { useMemo, useState, useRef, useEffect } from 'react'
+import { TreeItemProvider, useTreeItem } from './hooks/useTreeItem'
+import { ObjectItemProps } from 'sanity'
 import {
   CheckmarkIcon,
   ChevronDownIcon,
@@ -11,11 +11,11 @@ import {
   TrashIcon,
   EllipsisHorizontalIcon,
 } from '@sanity/icons'
-import {Button, Card, CardTone, Flex, Text, Tooltip} from '@sanity/ui'
-import {useSortable} from '@dnd-kit/react/sortable'
-import {useTree} from './hooks/useTree'
-import {createPortal} from 'react-dom'
-import {getToneFromValidation} from './validation'
+import { Button, Card, CardTone, Flex, Text, Tooltip } from '@sanity/ui'
+import { useSortable } from '@dnd-kit/react/sortable'
+import { useTree } from './hooks/useTree'
+import { createPortal } from 'react-dom'
+import { getToneFromValidation } from './validation'
 
 const config = {
   alignment: {
@@ -28,9 +28,9 @@ const config = {
 } as const
 
 export function MenuItem(props: ObjectItemProps) {
-  const {value, onRemove, path} = props
+  const { value, onRemove, path } = props
 
-  const {flattenedItems} = useTree()
+  const { flattenedItems } = useTree()
   const rootTree = useRef(null)
 
   const flattenedItem = useMemo(() => {
@@ -61,8 +61,29 @@ export function MenuItem(props: ObjectItemProps) {
   const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
-    rootTree.current = document.querySelector(`[data-root-tree="${value?._key}"]`)
-  }, [value])
+
+    const element = document.querySelector(`[data-root-tree="${value?._key}"]`)
+   
+    if (element) {
+      rootTree.current = element
+      return
+    }
+
+
+    const timer = setTimeout(() => {
+      const element = document.querySelector(`[data-root-tree="${value?._key}"]`)
+      if (element) {
+        rootTree.current = element
+        // Force a re-render if needed, though setting state/ref usually triggers it.
+        // Consider if you need an explicit state update here to force re-render
+        // For example: setSomeState(prev => !prev)
+      }
+    }, 0); // 0ms timeout often pushes execution after the current render cycle
+
+    // Cleanup function to clear the timeout if the component unmounts
+    // or dependencies change before the timeout executes.
+    return () => clearTimeout(timer);
+  }, []) // Ensure dependency array is correct
 
   useEffect(() => {
     const member = props.inputProps.members[0]
@@ -88,7 +109,7 @@ export function MenuItem(props: ObjectItemProps) {
     <>
       {rootTree.current &&
         createPortal(
-          <TreeItemProvider value={{isEditing, setIsEditing, isHovering, setIsHovering}}>
+          <TreeItemProvider value={{ isEditing, setIsEditing, isHovering, setIsHovering }}>
             {hasChildren && (
               <Tooltip
                 content={<Text size={1}>{collapsed ? 'Expand' : 'Collapse'}</Text>}
@@ -112,7 +133,7 @@ export function MenuItem(props: ObjectItemProps) {
           }
         `}
             </style>
-            <Flex width="fill" style={{width: '100%'}} id="menu-item">
+            <Flex width="fill" style={{ width: '100%' }} id="menu-item">
               {isEditing && hasInputComponent ? (
                 inlineEditingProps.renderInput(inlineEditingProps)
               ) : (
@@ -124,14 +145,14 @@ export function MenuItem(props: ObjectItemProps) {
                   paddingX={2}
                   onClick={() => (hasInputComponent ? setIsEditing(true) : props.onOpen(path))}
                   textAlign="left"
-                  style={{width: '100%', height: '33px'}}
+                  style={{ width: '100%', height: '33px' }}
                 >
                   {props.inputProps.renderPreview(props.inputProps)}
                 </Button>
               )}
             </Flex>
             {(isHovering || isEditing) && (
-              <Flex gap={1} style={{flexShrink: 0}}>
+              <Flex gap={1} style={{ flexShrink: 0 }}>
                 {isEditing ? (
                   <Tooltip
                     content={<Text size={1}>Preview</Text>}
@@ -193,7 +214,7 @@ export function MenuItem(props: ObjectItemProps) {
           </TreeItemProvider>,
           rootTree.current,
         )}
-      <div style={{display: 'none'}} key={value.children?.length}>
+      <div style={{ display: 'none' }} key={value.children?.length}>
         {childrenProps.renderInput(childrenProps)}
       </div>
     </>
