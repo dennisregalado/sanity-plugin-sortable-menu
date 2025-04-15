@@ -2,7 +2,6 @@ import { EllipsisVerticalIcon } from "@sanity/icons";
 import { Box, Button, Menu, MenuButton, MenuDivider, MenuItem, Text } from "@sanity/ui";
 
 export function ContextMenu({
-    value,
     menu,
     onClick
 }: {

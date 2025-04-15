@@ -54,7 +54,7 @@ export function SortableTreeInput(props: ArrayOfObjectsInputProps) {
 
     const maxDepth = 5
 
-    console.log(props.members)
+    console.log(parentValue)
 
     const sanityArrayItems = <>
         {props.members.map((member) => {
@@ -276,6 +276,7 @@ function RootTree({
                                 {renderAddButton && (
                                     <div style={{ marginLeft: (item.depth) * indentation, marginTop: 2 }}>
                                         <NewTreeItem
+                                            parentLabel={parent?.label}
                                             schemaType={schemaType}
                                             addItem={onAddItem}
                                         />

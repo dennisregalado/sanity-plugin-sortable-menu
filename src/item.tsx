@@ -46,7 +46,7 @@ export function Item(props: ObjectItemProps) {
     const [isHovering, setIsHovering] = useState(false)
     const [validation, setValidation] = useState<CardTone | undefined>(undefined)
     const [collapsed, setCollapsed] = useState(false)
- 
+
 
 
     useEffect(() => {
@@ -197,6 +197,9 @@ export function Item(props: ObjectItemProps) {
             </div>,
             rootTree.current
         )}
-        {childrenProps.renderInput(childrenProps)}
-    </>
+        <div style={{ display: 'none' }} key={value.children?.length}>
+            {childrenProps.renderInput(childrenProps)}
+        </div>
+
+</>
 }
