@@ -1,14 +1,11 @@
-import { defineArrayMember, defineType } from "sanity";
-import { SortableTreeInput } from "../SortableTreeInput"; 
+import {defineArrayMember, defineType} from 'sanity'
+import {SortableTreeInput} from '../SortableTreeInput'
 
 export const menu = defineType({
-    name: 'menu',
-    type: 'array',
-    components: { 
-        input: SortableTreeInput
-    },
-    of: [
-        defineArrayMember({ type: 'menuItem' }),
-        defineArrayMember({ type: 'image' })
-    ],
+  name: 'menu',
+  type: 'array',
+  components: {
+    //    input: SortableTreeInput
+  },
+  of: [defineArrayMember({type: 'menuItem'}), defineArrayMember({type: 'image'})],
 })
