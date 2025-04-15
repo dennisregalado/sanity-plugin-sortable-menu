@@ -7,7 +7,7 @@ interface Props {
     children: Item[];
 }
 
-export function TreeItemOverlay({ children }: Props) {
+export function SortableItemOverlay({ children }: Props) {
 
     const totalChildren = useMemo(() => {
         // Recursive function to count all children at all depths

@@ -5,7 +5,7 @@ import { randomKey } from '@sanity/util/content'
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useFormValue, set } from 'sanity'
 import { Card, Grid } from "@sanity/ui";
-import { TreeItemOverlay } from "./components/TreeItemOverlay";
+import { SortableItemOverlay } from "./components/SortableItemOverlay";
 import { DragOverlay, DragDropProvider } from "@dnd-kit/react";
 import { FlattenedItem } from "./types";
 import { buildTree, flattenTree, getDragDepth, getProjection } from "./utils";
@@ -108,7 +108,6 @@ function RootTree({
     schemaType: SchemaType
 }) {
 
-
     const [flattenedItems, setFlattenedItems] = useState<FlattenedItem[]>(() =>
         flattenTree(items)
     );
@@ -148,7 +147,7 @@ function RootTree({
                 });
 
                 initialDepth.current = depth;
-            }}
+            }}  
             onDragOver={(event, manager) => {
                 const { source, target } = event.operation;
 
@@ -287,7 +286,7 @@ function RootTree({
             </Card>
             <DragOverlay style={{ width: 'min-content' }}>
                 {(source) => (
-                    <TreeItemOverlay {...source} children={sourceChildren.current} />
+                    <SortableItemOverlay {...source} children={sourceChildren.current} />
                 )}
             </DragOverlay>
         </DragDropProvider>
