@@ -1,17 +1,5 @@
-import {definePlugin} from 'sanity'
-import {menu} from './schema/menu'
-import {menuItem} from './schema/menuItem'
+import { sortableMenu } from './plugin'
+import { SortableTreeInput } from './SortableTreeInput'
+import { SortableTreeField } from './SortableTreeField'
 
-interface PluginConfig {
-  /* nothing here yet */
-}
-
-export const sortableMenu = definePlugin<PluginConfig | void>((config = {}) => {
-  // eslint-disable-next-line no-console
-  return {
-    name: 'sanity-plugin-sortable-menu',
-    schema: {
-      types: [menu, menuItem],
-    },
-  }
-})
+export { sortableMenu, SortableTreeInput, SortableTreeField }
