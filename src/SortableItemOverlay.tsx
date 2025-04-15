@@ -1,7 +1,7 @@
 import {AddIcon} from '@sanity/icons'
 import {Button} from '@sanity/ui'
 import {useMemo} from 'react'
-import {Item} from '../types.js'
+import {Item} from './types.js'
 
 interface Props {
   children: Item[]

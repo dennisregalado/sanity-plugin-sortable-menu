@@ -1,11 +1,11 @@
 // @ts-nocheck
 import {ArrayOfObjectsInputProps, ArrayOfObjectsItem, SchemaType} from 'sanity'
-import {NewTreeItem} from './components/NewTreeItem'
+import {NewTreeItem} from './NewSortableItem'
 import {randomKey} from '@sanity/util/content'
 import {useCallback, useMemo, useRef, useState} from 'react'
 import {useFormValue, set} from 'sanity'
 import {Card, Grid} from '@sanity/ui'
-import {SortableItemOverlay} from './components/SortableItemOverlay'
+import {SortableItemOverlay} from './SortableItemOverlay'
 import {DragOverlay, DragDropProvider} from '@dnd-kit/react'
 import {FlattenedItem} from './types'
 import {buildTree, flattenTree, getDragDepth, getProjection} from './utils'
