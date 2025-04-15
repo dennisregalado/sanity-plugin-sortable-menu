@@ -1,7 +1,15 @@
+export interface Reference {
+  _ref: string;
+  _type: 'reference';
+}
+
 export interface Item {
+  _type: 'menuItem';
   _key: string;
-  children: Item[];
-  collapsed?: boolean;
+  label?: string;
+  url?: string;
+  reference?: Reference;
+  children?: Item[];
 }
 
 export interface FlattenedItem extends Item {

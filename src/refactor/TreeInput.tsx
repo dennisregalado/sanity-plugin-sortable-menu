@@ -124,11 +124,11 @@ function RootTree({
 
     const isLastChild = (item: FlattenedItem) => {
         const siblings = flattenedItems.filter(i => i.parentId === item.parentId);
-        return siblings[siblings.length - 1]?.id === item.id;
+        return siblings[siblings.length - 1]?._key === item._key;
     };
 
     const getParentItem = (parentId: string | null) => {
-        return parentId ? flattenedItems.find(item => item.id === parentId) : null;
+        return parentId ? flattenedItems.find(item => item._key === parentId) : null;
     };
 
 
@@ -139,7 +139,7 @@ function RootTree({
 
                 if (!source) return;
 
-                const { depth } = flattenedItems.find(({ id }) => id === source.id)!;
+                const { depth } = flattenedItems.find(({ _key }) => _key === source.id)!;
 
                 setFlattenedItems((flattenedItems) => {
                     sourceChildren.current = [];
@@ -167,25 +167,22 @@ function RootTree({
                         const dragDepth = getDragDepth(offsetLeft, indentation);
                         const projectedDepth = initialDepth.current + dragDepth;
 
-
-                        // Prevent dragging items beyond the maximum allowed depth
-                        // If the projected depth would exceed maxDepth, return the current state unchanged
-                        if (projectedDepth > maxDepth) {
-                            return flattenedItems;
-                        }
-
                         const { depth, parentId } = getProjection(
                             flattenedItems,
                             target.id,
                             projectedDepth
                         );
 
-                        const sortedItems = move(flattenedItems, event);
-                        const newItems = sortedItems.map((item) =>
-                            item.id === source.id ? { ...item, depth, parentId } : item
-                        );
+                        // Map _key to id for dnd-kit compatibility
+                        const itemsWithId = flattenedItems.map(item => ({ ...item, id: item._key }));
+                        const sortedItemsWithId = move(itemsWithId, event);
+                        // Map id back to _key and update the moved item
+                        const newItems = sortedItemsWithId.map((item: FlattenedItem & { id: string }) => {
+                            const { id, ...rest } = item; // Remove the temporary id field
+                            return item._key === source.id ? { ...rest, depth, parentId } : rest;
+                        });
 
-                        return newItems;
+                        return newItems as FlattenedItem[]; // Assert type back to FlattenedItem[]
                     });
                 }
             }}
@@ -208,12 +205,6 @@ function RootTree({
                             event.preventDefault();
 
                             keyboardDepth = currentDepth + Math.sign(event.by!.x);
-
-                            // Prevent keyboard navigation beyond maxDepth
-                            // If the keyboard navigation would take the item beyond maxDepth, cancel the operation
-                            if (keyboardDepth > maxDepth) {
-                                return;
-                            }
                         }
                     }
 
@@ -222,13 +213,6 @@ function RootTree({
 
                     const projectedDepth =
                         keyboardDepth ?? initialDepth.current + dragDepth;
-
-
-                    // Prevent dragging beyond maxDepth
-                    // If the projected depth would exceed maxDepth, cancel the drag operation
-                    if (projectedDepth > maxDepth) {
-                        return;
-                    }
 
                     const { depth, parentId } = getProjection(
                         flattenedItems,
@@ -252,8 +236,8 @@ function RootTree({
                         source.data!.parentId !== parentId
                     ) {
                         setFlattenedItems((flattenedItems) => {
-                            return flattenedItems.map((item) =>
-                                item.id === source.id ? { ...item, depth, parentId } : item
+                            return flattenedItems.map((item: FlattenedItem) => // Add explicit type
+                                item._key === source.id ? { ...item, depth, parentId } : item
                             );
                         });
                     }
@@ -284,6 +268,7 @@ function RootTree({
 
                         const parent = getParentItem(item.parentId);
                         const renderAddButton = parent && isLastChild(item) && item.depth <= maxDepth;
+
 
                         return (
                             <React.Fragment key={item._key}>
