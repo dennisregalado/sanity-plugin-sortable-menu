@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { TreeItemProvider } from './hooks/useTreeItem';
 import { ObjectItemProps } from 'sanity';
-import { CheckmarkIcon, ChevronDownIcon, ChevronRightIcon, DragHandleIcon, EditIcon, TrashIcon } from '@sanity/icons';
+import { CheckmarkIcon, ChevronDownIcon, ChevronRightIcon, DragHandleIcon, EditIcon, TrashIcon, EllipsisHorizontalIcon } from '@sanity/icons';
 import { Button, Card, CardTone, Flex, Text, Tooltip } from '@sanity/ui';
 import { useSortable } from '@dnd-kit/react/sortable';
 import { useTree } from './hooks/useTree';
@@ -16,11 +16,11 @@ const config = {
     },
     transition: {
         idle: true,
-    }, 
+    },
 } as const;
 
 export function MenuItem(props: ObjectItemProps) {
-    const { value, onRemove } = props;
+    const { value, onRemove, path } = props;
 
     const { flattenedItems } = useTree();
     const rootTree = useRef(null);
@@ -47,7 +47,7 @@ export function MenuItem(props: ObjectItemProps) {
     const [isHovering, setIsHovering] = useState(false)
     const [validation, setValidation] = useState<CardTone | undefined>(undefined)
     const [collapsed, setCollapsed] = useState(false)
-    
+
     useEffect(() => {
         rootTree.current = document.querySelector(`[data-root-tree="${value?._key}"]`);
     }, [value]);
@@ -69,41 +69,82 @@ export function MenuItem(props: ObjectItemProps) {
         return flattenedItem?.index ?? 0
     }, [flattenedItem])
 
-    const { ref, handleRef, isDragSource, isDragging } = useSortable({
-        ...config,
-        id: value._key,
-        index: index,
-        data: {
-            depth: depth,
-            parentId: flattenedItem?.parentId,
-        },
-    });
 
-
+    const hasInputComponent = useMemo(() => {
+        return Boolean(props.schemaType.components?.input)
+    }, [props.schemaType])
 
     return <>
-        {rootTree.current && createPortal(
-            <div ref={ref} aria-hidden={isDragSource} style={{
-                marginLeft: depth * 50,
-                ...(isDragging && {
-                    zIndex: 5,
-                    position: 'relative',
-                })
-            }}>
-                <TreeItemProvider value={{ isEditing, setIsEditing, isHovering, setIsHovering }}>
-                    <Card
-                        padding={1}
-                        radius={2}
-                        shadow={(!isHovering && isDragging) ? 5 : 0}
-                        tone={isHovering && !isDragging && !isEditing ? 'transparent' : 'inherit'}
-                        onMouseEnter={() => setIsHovering(true)}
-                        onMouseLeave={() => setIsHovering(false)}
-                    >
-                        <Flex gap={1} width="fill" align={isEditing ? 'flex-end' : 'center'} paddingBottom={isEditing ? 3 : 0}>
+        {rootTree.current && createPortal(<TreeItemProvider value={{ isEditing, setIsEditing, isHovering, setIsHovering }}>
+
+            {hasChildren && (
+                <Tooltip
+                    content={
+                        <Text size={1}>
+                            {collapsed ? 'Expand' : 'Collapse'}
+                        </Text>
+                    }
+                    animate
+                    fallbackPlacements={['right', 'left']}
+                    placement="bottom"
+                    portal
+                >
+                    <Button mode="bleed" paddingX={2} icon={collapsed ? ChevronRightIcon : ChevronDownIcon} onClick={() => setCollapsed(!collapsed)} />
+                </Tooltip>
+            )}
+            <style>
+                {`
+          #menu-item > div {
+            width: 100%;
+          }
+        `}
+            </style>
+            <Flex width="fill" style={{ width: '100%' }} id='menu-item'>
+                {isEditing && hasInputComponent ? inlineEditingProps.renderInput(inlineEditingProps) : <Button
+                    mode="bleed"
+                    width="fill"
+                    height={34}
+                    paddingY={0}
+                    paddingX={2}
+                    onClick={() => hasInputComponent ? setIsEditing(true) : props.onOpen(path)}
+                    textAlign='left'
+                    style={{ width: '100%', height: '33px' }}
+                >
+                    {props.inputProps.renderPreview(props.inputProps)}
+                </Button>}
+            </Flex>
+            {(isHovering || isEditing) && (
+                <Flex gap={1} style={{ flexShrink: 0 }}>
+                    {isEditing ?
+                        <Tooltip
+                            content={
+                                <Text size={1}>
+                                    Preview
+                                </Text>
+                            }
+                            animate
+                            fallbackPlacements={['right', 'left']}
+                            placement="bottom"
+                            portal
+                        >
+                            <Button paddingX={2} mode="bleed" icon={CheckmarkIcon} onClick={() => setIsEditing(false)} />
+                        </Tooltip> : !hasInputComponent ? <Tooltip
+                            content={
+                                <Text size={1}>
+                                    Open
+                                </Text>
+                            }
+                            animate
+                            fallbackPlacements={['right', 'left']}
+                            placement="bottom"
+                            portal
+                        >
+                            <Button paddingX={2} mode="bleed" icon={EllipsisHorizontalIcon} />
+                        </Tooltip> :
                             <Tooltip
                                 content={
                                     <Text size={1}>
-                                        Drag to re-order
+                                        Edit
                                     </Text>
                                 }
                                 animate
@@ -111,94 +152,29 @@ export function MenuItem(props: ObjectItemProps) {
                                 placement="bottom"
                                 portal
                             >
-                                <Button ref={handleRef} paddingX={2} mode="bleed" icon={DragHandleIcon} style={{ cursor: 'all-scroll' }} />
+                                <Button paddingX={2} mode="bleed" icon={EditIcon} onClick={() => setIsEditing(true)} />
                             </Tooltip>
-                            {hasChildren && (
-                                <Tooltip
-                                    content={
-                                        <Text size={1}>
-                                            {collapsed ? 'Expand' : 'Collapse'}
-                                        </Text>
-                                    }
-                                    animate
-                                    fallbackPlacements={['right', 'left']}
-                                    placement="bottom"
-                                    portal
-                                >
-                                    <Button mode="bleed" paddingX={2} icon={collapsed ? ChevronRightIcon : ChevronDownIcon} onClick={() => setCollapsed(!collapsed)} />
-                                </Tooltip>
-                            )}
-                            <style>
-                                {`
-          #menu-item > div {
-            width: 100%;
-          }
-        `}
-                            </style>
-                            <Flex width="fill" style={{ width: '100%' }} id='menu-item'>
-                                {isEditing ? (
-                                    <>
-                                        {inlineEditingProps.renderInput(inlineEditingProps)}
-                                    </>
-                                ) : <>
-                                    {props.inputProps.renderPreview(props.inputProps)}
-                                </>
-                                }
-                            </Flex>
-                            {(isHovering || isEditing) && (
-                                <Flex gap={1} style={{ flexShrink: 0 }}>
-                                    {isEditing ?
-                                        <Tooltip
-                                            content={
-                                                <Text size={1}>
-                                                    Preview
-                                                </Text>
-                                            }
-                                            animate
-                                            fallbackPlacements={['right', 'left']}
-                                            placement="bottom"
-                                            portal
-                                        >
-                                            <Button paddingX={2} mode="bleed" icon={CheckmarkIcon} onClick={() => setIsEditing(false)} />
-                                        </Tooltip> :
-                                        <Tooltip
-                                            content={
-                                                <Text size={1}>
-                                                    Edit
-                                                </Text>
-                                            }
-                                            animate
-                                            fallbackPlacements={['right', 'left']}
-                                            placement="bottom"
-                                            portal
-                                        >
-                                            <Button paddingX={2} mode="bleed" icon={EditIcon} onClick={() => setIsEditing(true)} />
-                                        </Tooltip>
-                                    }
-                                    <Tooltip
-                                        content={
-                                            <Text size={1}>
-                                                Remove
-                                            </Text>
-                                        }
-                                        animate
-                                        fallbackPlacements={['right', 'left']}
-                                        placement="bottom"
-                                        portal
-                                    >
-                                        <Button mode="bleed" onClick={onRemove} paddingX={2} icon={TrashIcon} tone="critical" />
-                                    </Tooltip>
-                                </Flex>
-                            )}
-                        </Flex>
-                    </Card>
-                </TreeItemProvider>
-            </div>,
+                    }
+                    <Tooltip
+                        content={
+                            <Text size={1}>
+                                Remove
+                            </Text>
+                        }
+                        animate
+                        fallbackPlacements={['right', 'left']}
+                        placement="bottom"
+                        portal
+                    >
+                        <Button mode="bleed" onClick={onRemove} paddingX={2} icon={TrashIcon} tone="critical" />
+                    </Tooltip>
+                </Flex>
+            )}
+        </TreeItemProvider>,
             rootTree.current
         )}
         <div style={{ display: 'none' }} key={value.children?.length}>
             {childrenProps.renderInput(childrenProps)}
         </div>
-
-</>
+    </>
 }

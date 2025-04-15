@@ -5,6 +5,8 @@ interface TreeItemContextType {
     setIsEditing: (value: boolean) => void;
     isHovering: boolean;
     setIsHovering: (value: boolean) => void;
+    children: React.ReactNode;
+    setChildren: (value: React.ReactNode) => void;
 }
 
 const TreeItemContext = createContext<TreeItemContextType | undefined>(undefined);

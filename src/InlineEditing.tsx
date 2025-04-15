@@ -56,7 +56,8 @@ export const defaultMenu = [
         ]
     }
 ]
-export function MenuItemInput(props: ObjectInputProps) {
+
+export function InlineEditing(props: ObjectInputProps) {
 
     const isChildrenMember = useMemo(() => {
         return props.members.some((member) => member.kind === 'field' && member.name === 'children')

@@ -1,6 +1,5 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { MenuItemInput } from "../MenuItemInput";
-import { defaultMenu } from "../MenuItemInput";
+import { InlineEditing, defaultMenu } from "../InlineEditing";
 import { SortableTreeInput } from "../SortableTreeInput";
 import { SortableTreeField } from "../SortableTreeField";
 
@@ -8,7 +7,7 @@ export const menuItem = defineType({
     name: 'menuItem',
     title: 'Menu Item',
     components: {
-        input: MenuItemInput,
+        input: InlineEditing,
     },
     type: 'object',
     fieldsets: [{ name: 'advanced', title: 'Advanced' }],

@@ -16,6 +16,8 @@ import { MenuItemPreview } from "./MenuItemPreview";
 import React from "react";
 import { MenuItem } from "./MenuItem";
 import { Item } from "./types";
+import { useEffect } from "react";
+import { SortableItem } from "./SortableItem";
 
 const INDENTATION = 50;
 
@@ -87,6 +89,7 @@ export function SortableTreeInput(props: ArrayOfObjectsInputProps) {
 }
 
 function RootTree({
+    props,
     maxDepth = 3,
     indentation = 50,
     onChange,
@@ -95,6 +98,7 @@ function RootTree({
     schemaType,
     items = []
 }: {
+    props: ArrayOfObjectsInputProps;
     onChange: (items: Item[]) => void
     items: Item[]
     children: React.ReactNode
@@ -120,7 +124,6 @@ function RootTree({
     const getParentItem = (parentId: string | null) => {
         return parentId ? flattenedItems.find(item => item._key === parentId) : null;
     };
-
 
     return <>
         <DragDropProvider
@@ -248,21 +251,25 @@ function RootTree({
                 onChange(updatedTree);
             }}
         >
-
-            <TreeProvider value={{ flattenedItems, setFlattenedItems, maxDepth, indentation }}>
+            <TreeProvider value={{ flattenedItems, setFlattenedItems, maxDepth, indentation, props }}>
                 {children}
             </TreeProvider>
             <Card border={true} padding={1} radius={2}>
                 <Grid gap={1}>
-                    {flattenedItems.map((item) => {
+                    {flattenedItems.map((item, index) => {
 
                         const parent = getParentItem(item.parentId);
                         const renderAddButton = parent && isLastChild(item) && item.depth <= maxDepth;
-
-
+                        
                         return (
                             <React.Fragment key={item._key}>
-                                <div data-root-tree={item._key} style={{ display: 'contents' }}></div>
+                                <SortableItem
+                                    key={item._key}
+                                    {...item}
+                                    index={index}
+                                >
+                                    <div data-root-tree={item._key} style={{ display: 'contents' }}></div>
+                                </SortableItem>
                                 {renderAddButton && (
                                     <div style={{ marginLeft: (item.depth) * indentation, marginTop: 2 }}>
                                         <NewTreeItem

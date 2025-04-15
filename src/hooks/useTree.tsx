@@ -1,7 +1,9 @@
 import React, { createContext, useContext } from 'react';
 import { FlattenedItem } from '../types';
+import { ArrayOfObjectsInputProps } from 'sanity';
 
 interface TreeContextType {
+    props: ArrayOfObjectsInputProps
     flattenedItems: FlattenedItem[]
     setFlattenedItems: (items: FlattenedItem[]) => void
     maxDepth: number
