@@ -3,7 +3,7 @@ import { ArrayOfObjectsInputProps, ArrayOfObjectsInputProps, ArrayOfObjectsItem,
 import { NewTreeItem } from './NewSortableItem'
 import { randomKey } from '@sanity/util/content'
 import { useCallback, useMemo, useRef, useState } from 'react'
-import { useFormValue, set } from 'sanity'
+import { useFormValue, set, PatchEvent, insert } from 'sanity'
 import { Card, Grid } from '@sanity/ui'
 import { SortableItemOverlay } from './SortableItemOverlay'
 import { DragOverlay, DragDropProvider } from '@dnd-kit/react'
@@ -25,9 +25,6 @@ type SortableTreeInputProps = ArrayOfObjectsInputProps
 
 export function SortableTreeInput(props: SortableTreeInputProps) {
   const { onChange, path, onItemAppend, value, schemaType } = props
-
-  console.log('sortable tree input', props)
-
   const isRoot = useMemo(() => path.length === 1, [path])
   const hasChildren = useMemo(() => value && value.length > 0, [value])
   const parentPath = useMemo(() => path.slice(0, -1), [path])
@@ -43,55 +40,43 @@ export function SortableTreeInput(props: SortableTreeInputProps) {
     }, 0)
   }, [path])
 
-  const onAddItem = useCallback(
-    async (type: string) => {
-      const item = {
-        _key: randomKey(12),
-        _type: type,
-        parentId: parentValue?._key,
-        depth: parentDepth,
-        index: value?.length || 0,
-      }
-
-      onItemAppend(item)
-    },
-    [onChange],
-  )
-
   const maxDepth = 2
+
+  const members = useMemo(() => {
+    return props.members.filter((member) => member.kind === 'item').map((member) => {
+      return {
+        ...member,
+        item: {
+          ...member.item,
+          schemaType: {
+            ...member.item.schemaType,
+            components: {
+              ...member.item.schemaType.components,
+              item: MenuItem,
+              preview: MenuItemPreview,
+            },
+          },
+        },
+      }
+    })
+  }, [props.members]);
 
   const sanityArrayItems = (
     <>
-      {props.members
-        .filter((member) => member.kind === 'item')
-        .map((member) => (
-          <ArrayOfObjectsItem
-            {...props}
-            key={member.key}
-            member={{
-              ...member,
-              item: {
-                ...member.item,
-                schemaType: {
-                  ...member.item.schemaType,
-                  components: {
-                    ...member.item.schemaType.components,
-                    item: MenuItem,
-                    preview: MenuItemPreview,
-                  },
-                },
-              },
-            }}
-          />
-        ))}
+      {members.map((member) => (
+        <ArrayOfObjectsItem
+          {...props}
+          key={member.key}
+          member={member}
+        />
+      ))}
     </>
   )
 
   return isRoot ? (
     <RootTree
       maxDepth={maxDepth || 5}
-      indentation={INDENTATION}
-      onAddItem={onAddItem}
+      indentation={INDENTATION} 
       schemaType={schemaType}
       props={props}
       onChange={(items) => {
@@ -111,8 +96,7 @@ function RootTree({
   maxDepth = 3,
   indentation = 50,
   onChange,
-  children,
-  onAddItem,
+  children, 
   schemaType,
   items = [],
 }: {
@@ -121,8 +105,7 @@ function RootTree({
   items: Item[]
   children: React.ReactNode
   indentation?: number
-  maxDepth?: number
-  onAddItem: (type: string) => void
+  maxDepth?: number 
   schemaType: SchemaType
 }) {
   const [flattenedItems, setFlattenedItems] = useState<FlattenedItem[]>(() => flattenTree(items))
@@ -130,6 +113,46 @@ function RootTree({
   useEffect(() => {
     setFlattenedItems(flattenTree(items))
   }, [items])
+
+  function shapeMember(member: any, parentProps: any = undefined) {
+    return {
+      ...member,
+      parentProps: parentProps || props,
+    };
+  }
+
+  function traverseMembers(member: any, depth: number = 0): any[] {
+    if (depth >= maxDepth) return [];
+
+    const childrenMenu = member.item.members.find((m) => m.name === 'children');
+    const children = childrenMenu?.field?.members;
+
+    if (!children) {
+      return [];
+    }
+
+    return children.flatMap((child: any) => [
+      shapeMember(child, childrenMenu.field),
+      ...traverseMembers(child, depth + 1),
+    ]);
+  }
+
+  const mappedMembers = useMemo(() => {
+    const mappedMembers = props.members.flatMap((member) => [
+      shapeMember(member),
+      ...traverseMembers(member),
+    ]);
+
+    return flattenedItems.map((item) => {
+      const member = mappedMembers.find((m) => m.key === item._key)
+
+      return {
+        ...item,
+        member,
+      }
+    })
+  }, [flattenedItems]);
+
 
   const initialDepth = useRef(0)
   const sourceChildren = useRef<FlattenedItem[]>([])
@@ -275,31 +298,50 @@ function RootTree({
           onChange(updatedTree)
         }}
       >
-
         <Card border={true} padding={1} radius={2}>
           <Grid gap={1}>
-            {flattenedItems.map((item, index) => {
+            {mappedMembers.map((item, index) => {
               const parent = getParentItem(item.parentId)
               const renderAddButton = parent && isLastChild(item) && item.depth <= maxDepth
 
               return (
                 <React.Fragment key={item._key}>
-                  <SortableItem key={item._key} {...item} index={index}>
+                  <SortableItem {...item} index={index}>
                     <div data-root-tree={item._key} style={{ display: 'contents' }}></div>
                   </SortableItem>
                   {renderAddButton && (
-                    <div style={{ marginLeft: item.depth * indentation, marginTop: 2 }}>
+                    <div style={{ marginLeft: item.depth * indentation }}>
                       <NewTreeItem
                         parentLabel={parent?.label}
-                        schemaType={schemaType}
-                        addItem={onAddItem}
+                        schemaType={item.member.parentSchemaType}
+                        addItem={(type: string) => {
+                          const newItem = {
+                            _type: type,
+                            _key: randomKey(12),
+                          };
+
+                          const pathToArray = [...item.member.parentProps.path]; // Should resolve to `['menu', {_key: 'parent1'}, 'children']`
+
+                          console.log(pathToArray)
+                          return
+                          onChange(
+                            PatchEvent.from(
+                              insert([newItem], 'after', pathToArray) // 'after' is safe unless you're targeting a specific sibling
+                            )
+                          );
+                        }}
                       />
                     </div>
                   )}
                 </React.Fragment>
               )
             })}
-            <NewTreeItem addItem={onAddItem} schemaType={schemaType} />
+            <NewTreeItem addItem={(type) => {
+              props.onItemAppend({
+                _type: type,
+                _key: randomKey(12),
+              })
+            }} schemaType={props.schemaType} />
           </Grid>
         </Card>
         <TreeProvider value={{ flattenedItems, setFlattenedItems, maxDepth, indentation, props }}>
