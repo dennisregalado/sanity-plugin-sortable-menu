@@ -24,7 +24,7 @@ const INDENTATION = 50
 type SortableTreeInputProps = ArrayOfObjectsInputProps
 
 export function SortableTreeInput(props: SortableTreeInputProps) {
-  const { onChange, path, onItemAppend, value, schemaType } = props 
+  const { onChange, path, onItemAppend, value, schemaType } = props
 
   const maxDepth = 2
 
@@ -190,7 +190,6 @@ function RootTree({
           if (source && target && source.id !== target.id) {
 
 
-            const sourceCanBeNested = canBeNested(mappedMembers.find((item) => item._key === target.id))
 
             setFlattenedItems((flattenedItems) => {
               const offsetLeft = manager.dragOperation.transform.x
@@ -203,7 +202,13 @@ function RootTree({
                 return flattenedItems
               }
 
-              const { depth, parentId } = getProjection(flattenedItems, target.id, projectedDepth)
+              const { depth, parentId } = getProjection(flattenedItems, source.id, projectedDepth)
+
+              const targetItem = mappedMembers.find((item) => item._key === parentId);
+              
+              if (targetItem && !canBeNested(targetItem)) { // Then check if that target is nestable
+                return flattenedItems; // Prevent the update
+              }
 
               // Map _key to id for dnd-kit compatibility
               const itemsWithId = flattenedItems.map((item) => ({ ...item, id: item._key }))
@@ -258,7 +263,15 @@ function RootTree({
             }
 
             const { depth, parentId } = getProjection(flattenedItems, source.id, projectedDepth)
+            
 
+            const targetItem = mappedMembers.find((item) => item._key === parentId);
+            
+            if (targetItem && !canBeNested(targetItem)) { // Then check if that target is nestable
+              return flattenedItems; // Prevent the update
+            } 
+
+            console.log('onDragMove', parentId, source.id)
             if (keyboard) {
               if (currentDepth !== depth) {
                 const offset = indentation * (depth - currentDepth)
