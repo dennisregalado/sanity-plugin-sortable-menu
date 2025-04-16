@@ -7,6 +7,7 @@ import { TreeItemProvider } from './hooks/useTreeItem'
 const INDENTATION = 50
 
 export function SortableItem({ depth, _key, index, parentId, children }: any) {
+  
   const { ref, handleRef, isDragSource, isDragging } = useSortable({
     alignment: {
       x: 'start',
@@ -70,7 +71,7 @@ export function SortableItem({ depth, _key, index, parentId, children }: any) {
                 style={{ cursor: 'all-scroll' }}
               />
             </Tooltip>
-            {children}
+            <div data-root-tree={_key} style={{ display: 'contents' }}></div>
           </Flex>
         </Card>
       </div>

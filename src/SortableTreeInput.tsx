@@ -25,23 +25,14 @@ type SortableTreeInputProps = ArrayOfObjectsInputProps
 
 export function SortableTreeInput(props: SortableTreeInputProps) {
   const { onChange, path, onItemAppend, value, schemaType } = props
-  const isRoot = useMemo(() => path.length === 1, [path])
-  const hasChildren = useMemo(() => value && value.length > 0, [value])
-  const parentPath = useMemo(() => path.slice(0, -1), [path])
-  const parentValue = useFormValue(parentPath) as { label?: string; _key?: string } | undefined
 
-  const parentDepth = useMemo(() => {
-    return path.reduce<number>((acc, curr) => {
-      if (curr === 'children') {
-        return acc + 1
-      }
-
-      return acc
-    }, 0)
-  }, [path])
+  useEffect(() => {
+    console.log(props)
+  }, [props])
 
   const maxDepth = 2
 
+  const isRoot = useMemo(() => path.length === 1, [path])
   const members = useMemo(() => {
     return props.members.filter((member) => member.kind === 'item').map((member) => {
       return {
@@ -76,7 +67,7 @@ export function SortableTreeInput(props: SortableTreeInputProps) {
   return isRoot ? (
     <RootTree
       maxDepth={maxDepth || 5}
-      indentation={INDENTATION} 
+      indentation={INDENTATION}
       schemaType={schemaType}
       props={props}
       onChange={(items) => {
@@ -96,7 +87,7 @@ function RootTree({
   maxDepth = 3,
   indentation = 50,
   onChange,
-  children, 
+  children,
   schemaType,
   items = [],
 }: {
@@ -105,7 +96,7 @@ function RootTree({
   items: Item[]
   children: React.ReactNode
   indentation?: number
-  maxDepth?: number 
+  maxDepth?: number
   schemaType: SchemaType
 }) {
   const [flattenedItems, setFlattenedItems] = useState<FlattenedItem[]>(() => flattenTree(items))
@@ -306,9 +297,7 @@ function RootTree({
 
               return (
                 <React.Fragment key={item._key}>
-                  <SortableItem {...item} index={index}>
-                    <div data-root-tree={item._key} style={{ display: 'contents' }}></div>
-                  </SortableItem>
+                  <SortableItem {...item} index={index} />
                   {renderAddButton && (
                     <div style={{ marginLeft: item.depth * indentation }}>
                       <NewTreeItem

@@ -10,5 +10,5 @@ export const menu = defineType({
   options: {
     depth: 1,
   } as any,
-  of: [defineArrayMember({type: 'menuItem'})],
+  of: [defineArrayMember({type: 'menuItem'}), defineArrayMember({type: 'image'})],
 })
