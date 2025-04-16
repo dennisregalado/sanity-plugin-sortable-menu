@@ -6,12 +6,10 @@ import { ArraySchemaType } from 'sanity'
 export function NewTreeItem({
   parentLabel,
   addItem,
-  text = 'Add item',
   schemaType,
 }: {
   parentLabel: string
   addItem: (type: string) => void
-  text?: string
   schemaType?: ArraySchemaType
 }) {
   if (!schemaType) {
@@ -30,12 +28,9 @@ export function NewTreeItem({
     setIsOpen(false)
   }, [])
 
+  useClickOutsideEvent(handleClickOutside, () => [buttonElement.current])
+
   if (hasMultipleTypes) {
-
-
-    useClickOutsideEvent(handleClickOutside, () => [buttonElement.current])
-
-
     return (<Popover
       content={<Grid ref={buttonElement} gap={1}>
         {schemaType.of.map((item) => (
@@ -77,7 +72,7 @@ export function NewTreeItem({
       mode="bleed"
       icon={AddIcon}
       justify="flex-start"
-      text={text}
+      text={`Add ${schemaType.of[0].title?.toLocaleLowerCase()}`}
       textAlign="left"
       onClick={() => addItem(schemaType.of[0].name)}
       tone="suggest"
