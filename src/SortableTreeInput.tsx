@@ -24,11 +24,7 @@ const INDENTATION = 50
 type SortableTreeInputProps = ArrayOfObjectsInputProps
 
 export function SortableTreeInput(props: SortableTreeInputProps) {
-  const { onChange, path, onItemAppend, value, schemaType } = props
-
-  useEffect(() => {
-    console.log(props)
-  }, [props])
+  const { onChange, path, onItemAppend, value, schemaType } = props 
 
   const maxDepth = 2
 
@@ -157,6 +153,10 @@ function RootTree({
     return parentId ? flattenedItems.find((item) => item._key === parentId) : null
   }
 
+  const canBeNested = (item: FlattenedItem) => {
+    return item.member.item.members.some((m) => m.name === 'children')
+  }
+
   return (
     <>
       <DragDropProvider
@@ -188,6 +188,10 @@ function RootTree({
           event.preventDefault()
 
           if (source && target && source.id !== target.id) {
+
+
+            const sourceCanBeNested = canBeNested(mappedMembers.find((item) => item._key === target.id))
+
             setFlattenedItems((flattenedItems) => {
               const offsetLeft = manager.dragOperation.transform.x
               const dragDepth = getDragDepth(offsetLeft, indentation)
