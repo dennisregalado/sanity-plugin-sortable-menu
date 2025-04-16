@@ -1,13 +1,13 @@
-import {useSortable} from '@dnd-kit/react/sortable'
-import {DragHandleIcon} from '@sanity/icons'
-import {Tooltip, Text, Button, CardTone, Flex, Card} from '@sanity/ui'
-import {useState} from 'react'
-import {TreeItemProvider} from './hooks/useTreeItem'
+import { useSortable } from '@dnd-kit/react/sortable'
+import { DragHandleIcon } from '@sanity/icons'
+import { Tooltip, Text, Button, CardTone, Flex, Card } from '@sanity/ui'
+import { useState } from 'react'
+import { TreeItemProvider } from './hooks/useTreeItem'
 
 const INDENTATION = 50
 
-export function SortableItem({depth, _key, index, parentId, children}: any) {
-  const {ref, handleRef, isDragSource, isDragging} = useSortable({
+export function SortableItem({ depth, _key, index, parentId, children }: any) {
+  const { ref, handleRef, isDragSource, isDragging } = useSortable({
     alignment: {
       x: 'start',
       y: 'center',
@@ -29,7 +29,7 @@ export function SortableItem({depth, _key, index, parentId, children}: any) {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
-    <TreeItemProvider value={{isEditing, setIsEditing, isHovering, setIsHovering}}>
+    <TreeItemProvider value={{ isEditing, setIsEditing, isHovering, setIsHovering }}>
       <div
         ref={ref}
         style={{
@@ -67,7 +67,7 @@ export function SortableItem({depth, _key, index, parentId, children}: any) {
                 paddingX={2}
                 mode="bleed"
                 icon={DragHandleIcon}
-                style={{cursor: 'all-scroll'}}
+                style={{ cursor: 'all-scroll' }}
               />
             </Tooltip>
             {children}

@@ -5,7 +5,7 @@ import {SortableTreeField} from '../SortableTreeField'
 
 export const menuItem = defineType({
   name: 'menuItem',
-  title: 'Menu Item',
+  title: 'Menu item',
   components: {
     input: InlineEditing,
   },

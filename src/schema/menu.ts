@@ -7,5 +7,8 @@ export const menu = defineType({
   components: {
     input: SortableTreeInput,
   },
+  options: {
+    depth: 1,
+  } as any,
   of: [defineArrayMember({type: 'menuItem'}), defineArrayMember({type: 'image'})],
 })

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ArrayOfObjectsInputProps, ArrayOfObjectsItem, SchemaType } from 'sanity'
+import { ArrayOfObjectsInputProps, ArrayOfObjectsInputProps, ArrayOfObjectsItem, SchemaType, Image } from 'sanity'
 import { NewTreeItem } from './NewSortableItem'
 import { randomKey } from '@sanity/util/content'
 import { useCallback, useMemo, useRef, useState } from 'react'
@@ -21,8 +21,12 @@ import { SortableItem } from './SortableItem'
 
 const INDENTATION = 50
 
-export function SortableTreeInput(props: ArrayOfObjectsInputProps) {
+type SortableTreeInputProps = ArrayOfObjectsInputProps
+
+export function SortableTreeInput(props: SortableTreeInputProps) {
   const { onChange, path, onItemAppend, value, schemaType } = props
+
+  console.log('sortable tree input', props)
 
   const isRoot = useMemo(() => path.length === 1, [path])
   const hasChildren = useMemo(() => value && value.length > 0, [value])
@@ -89,6 +93,7 @@ export function SortableTreeInput(props: ArrayOfObjectsInputProps) {
       indentation={INDENTATION}
       onAddItem={onAddItem}
       schemaType={schemaType}
+      props={props}
       onChange={(items) => {
         onChange(set(items))
       }}
