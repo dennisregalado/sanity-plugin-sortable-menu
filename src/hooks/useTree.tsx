@@ -5,8 +5,7 @@ import {ArrayOfObjectsInputProps} from 'sanity'
 interface TreeContextType {
   props: ArrayOfObjectsInputProps
   flattenedItems: FlattenedItem[]
-  setFlattenedItems: (items: FlattenedItem[]) => void
-  maxDepth: number
+  setFlattenedItems: (items: FlattenedItem[]) => void 
   indentation: number
 }
 

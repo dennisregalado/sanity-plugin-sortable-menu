@@ -11,7 +11,7 @@ import { FlattenedItem } from './types'
 import { buildTree, flattenTree, getDragDepth, getProjection } from './utils'
 import { isKeyboardEvent } from '@dnd-kit/dom/utilities'
 import { move } from '@dnd-kit/helpers'
-import { TreeProvider } from './hooks/useTree'
+import { TreeProvider, useTree } from './hooks/useTree'
 import { MenuItemPreview } from './MenuItemPreview'
 import React from 'react'
 import { MenuItem } from './MenuItem'
@@ -26,27 +26,41 @@ type SortableTreeInputProps = ArrayOfObjectsInputProps
 export function SortableTreeInput(props: SortableTreeInputProps) {
   const { onChange, path, onItemAppend, value, schemaType } = props
 
+
   const maxDepth = 2
 
   const isRoot = useMemo(() => path.length === 1, [path])
+
+  const tree = !isRoot ? useTree() : undefined
+
   const members = useMemo(() => {
-    return props.members.filter((member) => member.kind === 'item').map((member) => {
-      return {
-        ...member,
-        item: {
-          ...member.item,
-          schemaType: {
-            ...member.item.schemaType,
-            components: {
-              ...member.item.schemaType.components,
-              item: MenuItem,
-              preview: MenuItemPreview,
+
+    return props.members.filter((member) => member.kind === 'item')
+      // Only show members that are in the tree
+      // resolves rerendering of portal when flattenedItem is undefined
+      .filter(({ key }) => {
+        return isRoot || tree?.flattenedItems?.some((item) => item._key === key)
+      }).map((member) => {
+        return {
+          ...member,
+          item: {
+            ...member.item,
+            schemaType: {
+              ...member.item.schemaType,
+              components: {
+                ...member.item.schemaType.components,
+                item: MenuItem,
+                preview: MenuItemPreview,
+              },
             },
           },
-        },
-      }
-    })
-  }, [props.members]);
+        }
+      })
+  }, [props.members, tree]);
+
+  useEffect(() => {
+    console.log('props', props)
+  }, [props])
 
   const sanityArrayItems = (
     <>
@@ -73,9 +87,7 @@ export function SortableTreeInput(props: SortableTreeInputProps) {
     >
       {sanityArrayItems}
     </RootTree>
-  ) : (
-    sanityArrayItems
-  )
+  ) : sanityArrayItems
 }
 
 function RootTree({
@@ -111,7 +123,7 @@ function RootTree({
   function traverseMembers(member: any, depth: number = 0): any[] {
     if (depth >= maxDepth) return [];
 
-    const childrenMenu = member.item.members.find((m) => m.name === 'children');
+    const childrenMenu = member?.item?.members?.find((m) => m.name === 'children');
     const children = childrenMenu?.field?.members;
 
     if (!children) {
@@ -140,7 +152,6 @@ function RootTree({
     })
   }, [flattenedItems]);
 
-
   const initialDepth = useRef(0)
   const sourceChildren = useRef<FlattenedItem[]>([])
 
@@ -153,8 +164,29 @@ function RootTree({
     return parentId ? flattenedItems.find((item) => item._key === parentId) : null
   }
 
-  const canBeNested = (item: FlattenedItem) => {
-    return item.member.item.members.some((m) => m.name === 'children')
+  const canBeNested = (item: FlattenedItem, sourceItem: FlattenedItem) => {
+    const hasChildren = item?.member?.item?.members?.find((m) => m.name === 'children')
+
+    if (!hasChildren) {
+      return false
+    }
+
+    const hasCompatibleType = hasChildren?.field?.schemaType.of.some((type) => {
+
+      const matchedType = type.name === sourceItem.member.item.schemaType.name
+
+      if (matchedType && type.name === 'reference') {
+        return type.to.some((parentType) => {
+          return sourceItem.member.item.schemaType.to.some((childType) => {
+            return childType.name === parentType.name
+          })
+        })
+      }
+
+      return matchedType
+    }) 
+
+    return hasCompatibleType
   }
 
   return (
@@ -205,8 +237,9 @@ function RootTree({
               const { depth, parentId } = getProjection(flattenedItems, source.id, projectedDepth)
 
               const targetItem = mappedMembers.find((item) => item._key === parentId);
-              
-              if (targetItem && !canBeNested(targetItem)) { // Then check if that target is nestable
+              const sourceItem = mappedMembers.find((item) => item._key === source.id);
+
+              if (targetItem && !canBeNested(targetItem, sourceItem)) { // Then check if that target is nestable
                 return flattenedItems; // Prevent the update
               }
 
@@ -263,15 +296,14 @@ function RootTree({
             }
 
             const { depth, parentId } = getProjection(flattenedItems, source.id, projectedDepth)
-            
+
 
             const targetItem = mappedMembers.find((item) => item._key === parentId);
-            
-            if (targetItem && !canBeNested(targetItem)) { // Then check if that target is nestable
+            const sourceItem = mappedMembers.find((item) => item._key === source.id);
+            if (targetItem && !canBeNested(targetItem, sourceItem)) { // Then check if that target is nestable
               return flattenedItems; // Prevent the update
-            } 
+            }
 
-            console.log('onDragMove', parentId, source.id)
             if (keyboard) {
               if (currentDepth !== depth) {
                 const offset = indentation * (depth - currentDepth)
@@ -328,7 +360,6 @@ function RootTree({
 
                           const pathToArray = [...item.member.parentProps.path]; // Should resolve to `['menu', {_key: 'parent1'}, 'children']`
 
-                          console.log(pathToArray)
                           return
                           onChange(
                             PatchEvent.from(
@@ -350,7 +381,7 @@ function RootTree({
             }} schemaType={props.schemaType} />
           </Grid>
         </Card>
-        <TreeProvider value={{ flattenedItems, setFlattenedItems, maxDepth, indentation, props }}>
+        <TreeProvider value={{ flattenedItems, setFlattenedItems, indentation, props }}>
           {children}
         </TreeProvider>
         <DragOverlay style={{ width: 'min-content' }}>

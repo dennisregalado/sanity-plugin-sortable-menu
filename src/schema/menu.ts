@@ -1,5 +1,5 @@
-import {defineArrayMember, defineType} from 'sanity'
-import {SortableTreeInput} from '../SortableTreeInput'
+import { defineArrayMember, defineType } from 'sanity'
+import { SortableTreeInput } from '../SortableTreeInput'
 
 export const menu = defineType({
   name: 'menu',
@@ -8,7 +8,7 @@ export const menu = defineType({
     input: SortableTreeInput,
   },
   options: {
-    depth: 1,
+    depth: 1
   } as any,
-  of: [defineArrayMember({type: 'menuItem'}), defineArrayMember({type: 'image'})],
+  of: [defineArrayMember({ type: 'menuItem' })],
 })

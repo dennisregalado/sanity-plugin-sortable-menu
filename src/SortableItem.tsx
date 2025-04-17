@@ -6,14 +6,14 @@ import { TreeItemProvider } from './hooks/useTreeItem'
 
 const INDENTATION = 50
 
-export function SortableItem({ depth, _key, index, parentId, children }: any) {
-  
+export function SortableItem({ depth, _key, index, parentId }: any) {
+
   const { ref, handleRef, isDragSource, isDragging } = useSortable({
     alignment: {
       x: 'start',
       y: 'center',
     },
-    transition: {
+    transition: { 
       idle: true,
     },
     id: _key,
@@ -26,8 +26,6 @@ export function SortableItem({ depth, _key, index, parentId, children }: any) {
 
   const [isEditing, setIsEditing] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
-  const [validation, setValidation] = useState<CardTone | undefined>(undefined)
-  const [collapsed, setCollapsed] = useState(false)
 
   return (
     <TreeItemProvider value={{ isEditing, setIsEditing, isHovering, setIsHovering }}>
@@ -43,6 +41,7 @@ export function SortableItem({ depth, _key, index, parentId, children }: any) {
         aria-hidden={isDragSource}
       >
         <Card
+          tone={isHovering && !isDragging && !isEditing ? 'transparent' : 'inherit'}
           padding={1}
           radius={2}
           shadow={!isHovering && isDragging ? 5 : 0}

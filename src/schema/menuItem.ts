@@ -1,7 +1,7 @@
-import {defineArrayMember, defineField, defineType} from 'sanity'
-import {InlineEditing, defaultMenu} from '../InlineEditing'
-import {SortableTreeInput} from '../SortableTreeInput'
-import {SortableTreeField} from '../SortableTreeField'
+import { defineArrayMember, defineField, defineType } from 'sanity'
+import { InlineEditing, defaultMenu } from '../InlineEditing'
+import { SortableTreeInput } from '../SortableTreeInput'
+import { SortableTreeField } from '../SortableTreeField'
 
 export const menuItem = defineType({
   name: 'menuItem',
@@ -10,7 +10,7 @@ export const menuItem = defineType({
     input: InlineEditing,
   },
   type: 'object',
-  fieldsets: [{name: 'advanced', title: 'Advanced'}],
+  fieldsets: [{ name: 'advanced', title: 'Advanced' }],
   fields: [
     defineField({
       name: 'label',
@@ -25,11 +25,11 @@ export const menuItem = defineType({
       hidden: true,
       weak: true,
       to: [
-        {type: 'shopAll'},
-        {type: 'product'},
-        {type: 'collection'},
-        {type: 'page'},
-        {type: 'bundles'},
+        { type: 'shopAll' },
+        { type: 'product' },
+        { type: 'collection' },
+        { type: 'page' },
+        { type: 'bundles' },
       ],
     }),
     defineField({
@@ -74,7 +74,7 @@ export const menuItem = defineType({
         field: SortableTreeField,
       },
       title: 'Children',
-      of: [defineArrayMember({type: 'menuItem'}), defineArrayMember({type: 'image'})],
+      of: [defineArrayMember({ type: 'menuItem' })],
     }),
     defineField({
       name: 'isEditing',
@@ -118,7 +118,7 @@ export const menuItem = defineType({
       url: 'url',
       media: 'reference.image',
     },
-    prepare({title, media, url}) {
+    prepare({ title, media, url }) {
       interface MenuItem {
         value?: string
         icon?: any

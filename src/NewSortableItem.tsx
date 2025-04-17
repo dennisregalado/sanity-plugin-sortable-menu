@@ -25,8 +25,10 @@ export function NewTreeItem({
   const buttonElement = useRef<HTMLDivElement | null>(null)
 
   const handleClickOutside = useCallback(() => {
-    setIsOpen(false)
-  }, [])
+    if (isOpen) {
+      setIsOpen(false)
+    }
+  }, [isOpen])
 
   useClickOutsideEvent(handleClickOutside, () => [buttonElement.current])
 
@@ -72,7 +74,7 @@ export function NewTreeItem({
       mode="bleed"
       icon={AddIcon}
       justify="flex-start"
-      text={`Add ${schemaType.of[0].title?.toLocaleLowerCase()}`}
+      text={`Add ${schemaType.of[0].title}`}
       textAlign="left"
       onClick={() => addItem(schemaType.of[0].name)}
       tone="suggest"
