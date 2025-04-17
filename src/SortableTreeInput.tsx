@@ -58,10 +58,6 @@ export function SortableTreeInput(props: SortableTreeInputProps) {
       })
   }, [props.members, tree]);
 
-  useEffect(() => {
-    console.log('props', props)
-  }, [props])
-
   const sanityArrayItems = (
     <>
       {members.map((member) => (
