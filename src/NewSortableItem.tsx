@@ -74,7 +74,7 @@ export function NewTreeItem({
       mode="bleed"
       icon={AddIcon}
       justify="flex-start"
-      text={`Add ${schemaType.of[0].title}`}
+      text={`Add ${schemaType.of[0].title?.toLocaleLowerCase()}`}
       textAlign="left"
       onClick={() => addItem(schemaType.of[0].name)}
       tone="suggest"

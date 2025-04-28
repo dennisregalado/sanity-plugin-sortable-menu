@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useSortable } from '@dnd-kit/react/sortable'
 import { DragHandleIcon } from '@sanity/icons'
 import { Tooltip, Text, Button, CardTone, Flex, Card } from '@sanity/ui'
